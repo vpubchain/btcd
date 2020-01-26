@@ -356,7 +356,7 @@ func writeElement(w io.Writer, element interface{}) error {
 	// type assertions first.
 	switch e := element.(type) {
 	case uint8:
-		err := binarySerializer.PutUint8(w, littleEndian, uint8(e))
+		err := binarySerializer.PutUint8(w, uint8(e))
 		if err != nil {
 			return err
 		}
