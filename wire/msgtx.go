@@ -11,7 +11,7 @@ import (
 	"strconv"
 
 	"github.com/martinboehm/btcd/chaincfg/chainhash"
-	"github.com/martinboehm/btcd/bech32"
+	"github.com/martinboehm/btcutil/bech32"
 )
 
 const (
