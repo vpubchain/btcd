@@ -192,6 +192,13 @@ func readElement(r io.Reader, element interface{}) error {
 	// Attempt to read the element based on the concrete type via fast
 	// type assertions first.
 	switch e := element.(type) {
+	case *uint8:
+		rv, err := binarySerializer.Uint8(r)
+		if err != nil {
+			return err
+		}
+		*e = uint8(rv)
+		return nil		
 	case *int32:
 		rv, err := binarySerializer.Uint32(r, littleEndian)
 		if err != nil {
@@ -348,6 +355,12 @@ func writeElement(w io.Writer, element interface{}) error {
 	// Attempt to write the element based on the concrete type via fast
 	// type assertions first.
 	switch e := element.(type) {
+	case uint8:
+		err := binarySerializer.PutUint8(w, littleEndian, uint8(e))
+		if err != nil {
+			return err
+		}
+		return nil
 	case int32:
 		err := binarySerializer.PutUint32(w, littleEndian, uint32(e))
 		if err != nil {
