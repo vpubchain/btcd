@@ -1059,7 +1059,7 @@ func (a *WitnessAddressType) Deserialize(r io.Reader) error {
 	return nil
 }
 
-func (m *WitnessAddressType) ToString() string {
+func (m *WitnessAddressType) ToString(hrp string) string {
 	if m != nil {
 		if len(m.WitnessProgram) <= 4 && string(m.WitnessProgram) == "burn" {
 			return "burn"
@@ -1069,7 +1069,13 @@ func (m *WitnessAddressType) ToString() string {
 		if err != nil {
 			return ""
 		}
-		encoded, err := bech32.Encode("sys", conv)
+		// Concatenate the witness version and program, and encode the resulting
+		// bytes using bech32 encoding.
+		combined := make([]byte, len(conv)+1)
+		combined[0] = m.Version
+		copy(combined[1:], conv)
+
+		encoded, err := bech32.Encode(hrp, combined)
 		if err != nil {
 			return ""
 		}
