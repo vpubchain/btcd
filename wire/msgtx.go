@@ -1050,11 +1050,11 @@ type AssetAllocation struct {
 func (a *WitnessAddressType) Deserialize(r io.Reader) error {
 	err := readElement(r, &a.Version)
 	if err != nil {
-		return errors.New("rocksdb: WitnessAddressType Deserialize Version")
+		return err
 	}
-	a.WitnessProgram, err = wire.ReadVarBytes(r, 0, 256, "WitnessProgram")
+	a.WitnessProgram, err = ReadVarBytes(r, 0, 256, "WitnessProgram")
 	if err != nil {
-		return errors.New("rocksdb: WitnessAddressType Deserialize WitnessProgram")
+		return err
 	}
 	return nil
 }
@@ -1085,14 +1085,14 @@ func (a *RangeAmountPairType) Deserialize(r io.Reader) error {
 	}
 	err = readElement(r, &a.ValueSat)
 	if err != nil {
-		return errors.New("rocksdb: WitnessAddressType Deserialize ValueSat: error")
+		return err
 	}
 	return nil
 }
 func (a *AssetAllocationTupleType) Deserialize(r io.Reader) error {
 	err := readElement(r, &a.Asset)
 	if err != nil {
-		return errors.New("rocksdb: AssetAllocationTupleType Deserialize Asset")
+		return err
 	}
 	err = a.WitnessAddress.Deserialize(r)
 	if err != nil {
@@ -1108,7 +1108,7 @@ func (a *AssetAllocation) Deserialize(r io.Reader) error {
 	var numReceivers uint8
 	err = readElement(r, &numReceivers)
 	if err != nil {
-		return errors.New("rocksdb: AssetAllocation Deserialize numReceivers")
+		return err
 	}
 	a.ListSendingAllocationAmounts = make([]RangeAmountPairType, numReceivers)
 	for _, allocation := range a.ListSendingAllocationAmounts {
