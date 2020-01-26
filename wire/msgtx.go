@@ -1117,8 +1117,8 @@ func (a *AssetAllocation) Deserialize(r io.Reader) error {
 		return err
 	}
 	a.ListSendingAllocationAmounts = make([]RangeAmountPairType, numReceivers)
-	for _, allocation := range a.ListSendingAllocationAmounts {
-		err = allocation.Deserialize(r)
+	for i := range a.ListSendingAllocationAmounts {
+		err = a.ListSendingAllocationAmounts[i].Deserialize(r)
 		if err != nil {
 			return err
 		}
