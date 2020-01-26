@@ -11,6 +11,7 @@ import (
 	"strconv"
 
 	"github.com/martinboehm/btcd/chaincfg/chainhash"
+	"github.com/martinboehm/btcd/bech32"
 )
 
 const (
@@ -1019,6 +1020,99 @@ func writeTxWitness(w io.Writer, pver uint32, version int32, wit [][]byte) error
 	}
 	for _, item := range wit {
 		err = WriteVarBytes(w, pver, item)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+type WitnessAddressType struct {
+	Version uint8
+	WitnessProgram []byte
+}
+
+type RangeAmountPairType struct {
+	WitnessAddress WitnessAddressType
+	ValueSat int64
+}
+
+type AssetAllocationTupleType struct {
+	Asset uint32
+	WitnessAddress WitnessAddressType
+}
+
+type AssetAllocation struct {
+	AssetAllocationTuple AssetAllocationTupleType
+	ListSendingAllocationAmounts []RangeAmountPairType
+}
+
+func (a *WitnessAddressType) Deserialize(r io.Reader) error {
+	err := readElement(r, &a.Version)
+	if err != nil {
+		return errors.New("rocksdb: WitnessAddressType Deserialize Version")
+	}
+	a.WitnessProgram, err = wire.ReadVarBytes(r, 0, 256, "WitnessProgram")
+	if err != nil {
+		return errors.New("rocksdb: WitnessAddressType Deserialize WitnessProgram")
+	}
+	return nil
+}
+
+func (m *WitnessAddressType) ToString() string {
+	if m != nil {
+		if len(m.WitnessProgram) <= 4 && string(m.WitnessProgram) == "burn" {
+			return "burn"
+		}
+		// Convert data to base32:
+		conv, err := bech32.ConvertBits([]byte(m.WitnessProgram), 8, 5, true)
+		if err != nil {
+			return ""
+		}
+		encoded, err := bech32.Encode("sys", conv)
+		if err != nil {
+			return ""
+		}
+		return encoded
+	}
+	return ""
+}
+
+func (a *RangeAmountPairType) Deserialize(r io.Reader) error {
+	err := a.WitnessAddress.Deserialize(r)
+	if err != nil {
+		return err
+	}
+	err = readElement(r, &a.ValueSat)
+	if err != nil {
+		return errors.New("rocksdb: WitnessAddressType Deserialize ValueSat: error")
+	}
+	return nil
+}
+func (a *AssetAllocationTupleType) Deserialize(r io.Reader) error {
+	err := readElement(r, &a.Asset)
+	if err != nil {
+		return errors.New("rocksdb: AssetAllocationTupleType Deserialize Asset")
+	}
+	err = a.WitnessAddress.Deserialize(r)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+func (a *AssetAllocation) Deserialize(r io.Reader) error {
+	err := a.AssetAllocationTuple.Deserialize(r)
+	if err != nil {
+		return err
+	}
+	var numReceivers uint8
+	err = readElement(r, &numReceivers)
+	if err != nil {
+		return errors.New("rocksdb: AssetAllocation Deserialize numReceivers")
+	}
+	a.ListSendingAllocationAmounts = make([]RangeAmountPairType, numReceivers)
+	for _, allocation := range a.ListSendingAllocationAmounts {
+		err = allocation.Deserialize(r)
 		if err != nil {
 			return err
 		}
