@@ -1094,9 +1094,9 @@ func (a *AssetType) Deserialize(r io.Reader) error {
 	if err != nil {
 		return err
 	}
-	symbol, err = ReadVarBytes(r, 0, 8, "Symbol")
-	if err != nil {
-		return err
+	symbol, er := ReadVarBytes(r, 0, 8, "Symbol")
+	if er != nil {
+		return er
 	}
 	Symbol := string(symbol)
 
