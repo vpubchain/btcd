@@ -1042,9 +1042,97 @@ type AssetAllocationTupleType struct {
 	WitnessAddress WitnessAddressType
 }
 
-type AssetAllocation struct {
+type AssetAllocationType struct {
 	AssetAllocationTuple AssetAllocationTupleType
 	ListSendingAllocationAmounts []RangeAmountPairType
+}
+
+type AssetType struct {
+	Asset uint32
+	WitnessAddress WitnessAddressType
+	WitnessAddressTransfer WitnessAddressType
+	Contract []byte
+	Symbol string
+	TxHash  chainhash.Hash
+	Height uint32
+	PubData []byte
+	Balance int64
+	TotalSupply int64
+	MaxSupply int64
+	Precision uint8
+	UpdateFlags uint8
+}
+
+type MintSyscoinType struct {
+	AssetAllocationTuple AssetAllocationTupleType
+    TxValue []byte
+    TxParentNodes []byte
+    TxRoot []byte
+    TxPath []byte
+    ReceiptValue []byte
+    ReceiptParentNodes []byte
+    ReceiptRoot []byte
+    ReceiptPath []byte
+    BlockNumber uint32
+    ValueAsset int64
+}
+
+func (a *AssetType) Deserialize(r io.Reader) error {
+	err := readElement(r, &a.Asset)
+	if err != nil {
+		return err
+	}
+	err = a.WitnessAddress.Deserialize(r)
+	if err != nil {
+		return err
+	}
+	err = a.WitnessAddressTransfer.Deserialize(r)
+	if err != nil {
+		return err
+	}
+	a.Contract, err = ReadVarBytes(r, 0, 20, "Contract")
+	if err != nil {
+		return err
+	}
+	symbol, err = ReadVarBytes(r, 0, 8, "Symbol")
+	if err != nil {
+		return err
+	}
+	Symbol := string(symbol)
+
+	err = readElement(r, &a.TxHash)
+	if err != nil {
+		return err
+	}
+	err = readElement(r, &a.Height)
+	if err != nil {
+		return err
+	}
+	a.PubData, err = ReadVarBytes(r, 0, 512, "PubData")
+	if err != nil {
+		return err
+	}
+	err = readElement(r, &a.Balance)
+	if err != nil {
+		return err
+	}
+	err = readElement(r, &a.TotalSupply)
+	if err != nil {
+		return err
+	}
+	err = readElement(r, &a.MaxSupply)
+	if err != nil {
+		return err
+	}
+	err = readElement(r, &a.Precision)
+	if err != nil {
+		return err
+	}
+	err = readElement(r, &a.UpdateFlags)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (a *WitnessAddressType) Deserialize(r io.Reader) error {
@@ -1095,6 +1183,7 @@ func (a *RangeAmountPairType) Deserialize(r io.Reader) error {
 	}
 	return nil
 }
+
 func (a *AssetAllocationTupleType) Deserialize(r io.Reader) error {
 	err := readElement(r, &a.Asset)
 	if err != nil {
@@ -1106,7 +1195,8 @@ func (a *AssetAllocationTupleType) Deserialize(r io.Reader) error {
 	}
 	return nil
 }
-func (a *AssetAllocation) Deserialize(r io.Reader) error {
+
+func (a *AssetAllocationType) Deserialize(r io.Reader) error {
 	err := a.AssetAllocationTuple.Deserialize(r)
 	if err != nil {
 		return err
@@ -1122,6 +1212,54 @@ func (a *AssetAllocation) Deserialize(r io.Reader) error {
 		if err != nil {
 			return err
 		}
+	}
+	return nil
+}
+
+func (a *MintSyscoinType) Deserialize(r io.Reader) error {
+	err := a.AssetAllocationTuple.Deserialize(r)
+	if err != nil {
+		return err
+	}
+	a.TxValue, err = ReadVarBytes(r, 0, 4096, "TxValue")
+	if err != nil {
+		return err
+	}
+	a.TxParentNodes, err = ReadVarBytes(r, 0, 4096, "TxParentNodes")
+	if err != nil {
+		return err
+	}
+	a.TxRoot, err = ReadVarBytes(r, 0, 4096, "TxRoot")
+	if err != nil {
+		return err
+	}
+	a.TxPath, err = ReadVarBytes(r, 0, 4096, "TxPath")
+	if err != nil {
+		return err
+	}
+	a.ReceiptValue, err = ReadVarBytes(r, 0, 4096, "ReceiptValue")
+	if err != nil {
+		return err
+	}
+	a.ReceiptParentNodes, err = ReadVarBytes(r, 0, 4096, "ReceiptParentNodes")
+	if err != nil {
+		return err
+	}
+	a.ReceiptRoot, err = ReadVarBytes(r, 0, 4096, "ReceiptRoot")
+	if err != nil {
+		return err
+	}
+	a.ReceiptPath, err = ReadVarBytes(r, 0, 4096, "ReceiptPath")
+	if err != nil {
+		return err
+	}
+	err = readElement(r, &a.BlockNumber)
+	if err != nil {
+		return err
+	}
+	err = readElement(r, &a.ValueAsset)
+	if err != nil {
+		return err
 	}
 	return nil
 }
