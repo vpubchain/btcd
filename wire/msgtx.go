@@ -1078,19 +1078,15 @@ type MintSyscoinType struct {
 }
 
 func (a *AssetType) Deserialize(r io.Reader) error {
+	a.PubData, err := ReadVarBytes(r, 0, 512, "PubData")
+	if err != nil {
+		return err
+	}
+	err = readElement(r, &a.TxHash)
+	if err != nil {
+		return err
+	}
 	err := readElement(r, &a.Asset)
-	if err != nil {
-		return err
-	}
-	err = a.WitnessAddress.Deserialize(r)
-	if err != nil {
-		return err
-	}
-	err = a.WitnessAddressTransfer.Deserialize(r)
-	if err != nil {
-		return err
-	}
-	a.Contract, err = ReadVarBytes(r, 0, 20, "Contract")
 	if err != nil {
 		return err
 	}
@@ -1099,16 +1095,11 @@ func (a *AssetType) Deserialize(r io.Reader) error {
 		return er
 	}
 	a.Symbol = string(symbol)
-
-	err = readElement(r, &a.TxHash)
+	err = a.WitnessAddress.Deserialize(r)
 	if err != nil {
 		return err
 	}
-	err = readElement(r, &a.Height)
-	if err != nil {
-		return err
-	}
-	a.PubData, err = ReadVarBytes(r, 0, 512, "PubData")
+	err = a.WitnessAddressTransfer.Deserialize(r)
 	if err != nil {
 		return err
 	}
@@ -1124,11 +1115,19 @@ func (a *AssetType) Deserialize(r io.Reader) error {
 	if err != nil {
 		return err
 	}
-	err = readElement(r, &a.Precision)
+	err = readElement(r, &a.Height)
 	if err != nil {
 		return err
 	}
 	err = readElement(r, &a.UpdateFlags)
+	if err != nil {
+		return err
+	}
+	err = readElement(r, &a.Precision)
+	if err != nil {
+		return err
+	}
+	a.Contract, err = ReadVarBytes(r, 0, 20, "Contract")
 	if err != nil {
 		return err
 	}
