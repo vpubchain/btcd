@@ -1098,7 +1098,7 @@ func (a *AssetType) Deserialize(r io.Reader) error {
 	if er != nil {
 		return er
 	}
-	Symbol := string(symbol)
+	a.Symbol := string(symbol)
 
 	err = readElement(r, &a.TxHash)
 	if err != nil {
