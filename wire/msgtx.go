@@ -1078,11 +1078,12 @@ type MintSyscoinType struct {
 }
 
 func (a *AssetType) Deserialize(r io.Reader) error {
-	a.PubData, err = ReadVarBytes(r, 0, 512, "PubData")
+	PubData, err := ReadVarBytes(r, 0, 512, "PubData")
 	if err != nil {
 		return err
 	}
-	err = readElement(r, &a.TxHash)
+	a.PubData = PubData
+	err := readElement(r, &a.TxHash)
 	if err != nil {
 		return err
 	}
