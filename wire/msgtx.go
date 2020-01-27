@@ -1083,7 +1083,7 @@ func (a *AssetType) Deserialize(r io.Reader) error {
 		return err
 	}
 	a.PubData = PubData
-	err := readElement(r, &a.TxHash)
+	err = readElement(r, &a.TxHash)
 	if err != nil {
 		return err
 	}
