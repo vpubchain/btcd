@@ -1217,10 +1217,11 @@ func (a *AssetAllocationType) Deserialize(r io.Reader) error {
 }
 
 func (a *MintSyscoinType) Deserialize(r io.Reader) error {
-	a.TxValue, err = ReadVarBytes(r, 0, 4096, "TxValue")
+	TxValue, err := ReadVarBytes(r, 0, 4096, "TxValue")
 	if err != nil {
 		return err
 	}
+	a.TxValue = TxValue
 	a.TxParentNodes, err = ReadVarBytes(r, 0, 4096, "TxParentNodes")
 	if err != nil {
 		return err
