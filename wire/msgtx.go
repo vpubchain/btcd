@@ -1217,10 +1217,6 @@ func (a *AssetAllocationType) Deserialize(r io.Reader) error {
 }
 
 func (a *MintSyscoinType) Deserialize(r io.Reader) error {
-	err := a.AssetAllocationTuple.Deserialize(r)
-	if err != nil {
-		return err
-	}
 	a.TxValue, err = ReadVarBytes(r, 0, 4096, "TxValue")
 	if err != nil {
 		return err
@@ -1254,6 +1250,10 @@ func (a *MintSyscoinType) Deserialize(r io.Reader) error {
 		return err
 	}
 	err = readElement(r, &a.BlockNumber)
+	if err != nil {
+		return err
+	}
+	err = a.AssetAllocationTuple.Deserialize(r)
 	if err != nil {
 		return err
 	}
