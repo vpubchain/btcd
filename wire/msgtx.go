@@ -1197,7 +1197,7 @@ func (a *WitnessAddressType) Serialize(w io.Writer) error {
 	if err != nil {
 		return err
 	}
-	err := WriteVarBytes(r, 0, a.WitnessProgram)
+	err = WriteVarBytes(w, 0, a.WitnessProgram)
 	if err != nil {
 		return err
 	}
