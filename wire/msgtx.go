@@ -1135,7 +1135,7 @@ func (a *AssetType) Deserialize(r io.Reader) error {
 	return nil
 }
 
-func (a *AssetType) Serialize(w io.Write) error {
+func (a *AssetType) Serialize(w io.Writer) error {
 	var err error
 	err = WriteVarBytes(w, 0, a.PubData)
 	if err != nil {
@@ -1192,12 +1192,12 @@ func (a *AssetType) Serialize(w io.Write) error {
 	return nil
 }
 
-func (a *WitnessAddressType) Serialize(w io.Write) error {
+func (a *WitnessAddressType) Serialize(w io.Writer) error {
 	err := writeElement(w, a.Version)
 	if err != nil {
 		return err
 	}
-	err = WriteVarBytes(r, 0, a.WitnessProgram)
+	err := WriteVarBytes(r, 0, a.WitnessProgram)
 	if err != nil {
 		return err
 	}
