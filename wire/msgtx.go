@@ -1135,6 +1135,75 @@ func (a *AssetType) Deserialize(r io.Reader) error {
 	return nil
 }
 
+func (a *AssetType) Serialize(w io.Write) error {
+	var err error
+	err = WriteVarBytes(w, 0, a.PubData)
+	if err != nil {
+		return err
+	}
+	err = writeElement(w, a.TxHash)
+	if err != nil {
+		return err
+	}
+	err = writeElement(w, a.Asset)
+	if err != nil {
+		return err
+	}
+	err = WriteVarBytes(w, 0, ([]byte)(a.Symbol))
+	if err != nil {
+		return err
+	}
+	err = a.WitnessAddress.Serialize(w)
+	if err != nil {
+		return err
+	}
+	err = a.WitnessAddressTransfer.Serialize(w)
+	if err != nil {
+		return err
+	}
+	err = writeElement(w, a.Balance)
+	if err != nil {
+		return err
+	}
+	err = writeElement(w, a.TotalSupply)
+	if err != nil {
+		return err
+	}
+	err = writeElement(w, a.MaxSupply)
+	if err != nil {
+		return err
+	}
+	err = writeElement(w, a.Height)
+	if err != nil {
+		return err
+	}
+	err = writeElement(w, a.UpdateFlags)
+	if err != nil {
+		return err
+	}
+	err = writeElement(w, a.Precision)
+	if err != nil {
+		return err
+	}
+	err = WriteVarBytes(w, 0, a.Contract)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (a *WitnessAddressType) Serialize(w io.Write) error {
+	err := writeElement(w, a.Version)
+	if err != nil {
+		return err
+	}
+	err = WriteVarBytes(r, 0, a.WitnessProgram)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func (a *WitnessAddressType) Deserialize(r io.Reader) error {
 	err := readElement(r, &a.Version)
 	if err != nil {
