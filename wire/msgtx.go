@@ -1128,9 +1128,9 @@ func (a *AssetType) Deserialize(r io.Reader) error {
 	if err != nil {
 		return err
 	}
-	contract, err = ReadVarBytes(r, 0, 20, "Contract")
-	if err != nil {
-		return err
+	contract, erc := ReadVarBytes(r, 0, 20, "Contract")
+	if erc != nil {
+		return erc
 	}
 	a.Contract = string(contract)
 	return nil
