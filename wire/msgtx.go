@@ -1051,7 +1051,7 @@ type AssetType struct {
 	Asset uint32
 	WitnessAddress WitnessAddressType
 	WitnessAddressTransfer WitnessAddressType
-	Contract string
+	Contract []byte
 	Symbol string
 	TxHash  chainhash.Hash
 	Height uint32
@@ -1128,11 +1128,10 @@ func (a *AssetType) Deserialize(r io.Reader) error {
 	if err != nil {
 		return err
 	}
-	contract, err = ReadVarBytes(r, 0, 20, "Contract")
+	a.Contract, err = ReadVarBytes(r, 0, 20, "Contract")
 	if err != nil {
 		return err
 	}
-	a.Contract = string(contract)
 	return nil
 }
 
@@ -1186,7 +1185,7 @@ func (a *AssetType) Serialize(w io.Writer) error {
 	if err != nil {
 		return err
 	}
-	err = WriteVarBytes(w, 0, ([]byte)(a.Contract))
+	err = WriteVarBytes(w, 0, a.Contract)
 	if err != nil {
 		return err
 	}
