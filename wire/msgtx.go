@@ -1283,7 +1283,7 @@ func (a *AssetAllocationType) Deserialize(r io.Reader, version int32) error {
 		}
 		a.AssetAllocationTuple = AssetAllocationTupleType{Asset: syscoinBurnToEthereumType.Asset, WitnessAddress: syscoinBurnToEthereumType.WitnessAddress}
 		a.ListSendingAllocationAmounts = make([]RangeAmountPairType, 1)
-		a.ListSendingAllocationAmounts[0] = RangeAmountPairType{WitnessAddress: WitnessAddressType{Version: 0, WitnessProgram: ([]byte)("burn"}, ValueSat: syscoinBurnToEthereumType.ValueSat}
+		a.ListSendingAllocationAmounts[0] = RangeAmountPairType{WitnessAddress: WitnessAddressType{Version: 0, WitnessProgram: ([]byte)("burn")}, ValueSat: syscoinBurnToEthereumType.ValueSat}
 	} else {
 		err := a.AssetAllocationTuple.Deserialize(r)
 		if err != nil {
