@@ -1357,7 +1357,16 @@ func (a *MintSyscoinType) Deserialize(r io.Reader) error {
 func (a *SyscoinBurnToEthereumType) Deserialize(r io.Reader) error {
 	var amount uint64
 	var err error
+	// get varint bytes as throwaway between each field
+	_, err = binarySerializer.Uint8(r)
+	if err != nil {
+		return err
+	}
 	a.Asset, err = binarySerializer.Uint32(r, bigEndian)
+	if err != nil {
+		return err
+	}
+	_, err = binarySerializer.Uint8(r)
 	if err != nil {
 		return err
 	}
@@ -1370,11 +1379,19 @@ func (a *SyscoinBurnToEthereumType) Deserialize(r io.Reader) error {
 	if err != nil {
 		return err
 	}
+	_, err = binarySerializer.Uint8(r)
+	if err != nil {
+		return err
+	}
 	a.Precision, err = binarySerializer.Uint8(r)
 	if err != nil {
 		return err
 	}
 	a.Contract, err = ReadVarBytes(r, 0, 4096, "Contract")
+	if err != nil {
+		return err
+	}
+	_, err = binarySerializer.Uint8(r)
 	if err != nil {
 		return err
 	}
