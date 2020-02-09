@@ -1343,8 +1343,9 @@ func (a *MintSyscoinType) Deserialize(r io.Reader) error {
 }
 
 func (a *SyscoinBurnToEthereumType) Deserialize(r io.Reader) error {
-	var amount uint64	
-	a.Asset, err := binarySerializer.Uint32(r, bigEndian)
+	var amount uint64
+	var err error
+	a.Asset, err = binarySerializer.Uint32(r, bigEndian)
 	if err != nil {
 		return err
 	}
