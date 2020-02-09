@@ -1273,21 +1273,33 @@ func (a *AssetAllocationTupleType) Deserialize(r io.Reader) error {
 	return nil
 }
 
-func (a *AssetAllocationType) Deserialize(r io.Reader) error {
-	err := a.AssetAllocationTuple.Deserialize(r)
-	if err != nil {
-		return err
-	}
-	var numReceivers uint8
-	err = readElement(r, &numReceivers)
-	if err != nil {
-		return err
-	}
-	a.ListSendingAllocationAmounts = make([]RangeAmountPairType, numReceivers)
-	for i := range a.ListSendingAllocationAmounts {
-		err = a.ListSendingAllocationAmounts[i].Deserialize(r)
+func (a *AssetAllocationType) Deserialize(r io.Reader, version int32) error {
+	// syscoin burn to ethereum is a unique tx that we need to deserialize as an asset allocation manually
+	if version == 0x7407 {
+		var SyscoinBurnToEthereumType syscoinBurnToEthereumType
+		err := syscoinBurnToEthereumType.Deserialize(r)
 		if err != nil {
 			return err
+		}
+		a.AssetAllocationTuple = AssetAllocationTupleType{Asset: syscoinBurnToEthereumType.Asset, WitnessAddress: syscoinBurnToEthereumType.WitnessAddress}
+		a.ListSendingAllocationAmounts = make([]RangeAmountPairType, 1)
+		a.ListSendingAllocationAmounts[0] = RangeAmountPairType{WitnessAddress: WitnessAddressType{Version: 0, WitnessProgram: ([]byte)("burn"}, ValueSat: syscoinBurnToEthereumType.ValueSat}
+	} else {
+		err := a.AssetAllocationTuple.Deserialize(r)
+		if err != nil {
+			return err
+		}
+		var numReceivers uint8
+		err = readElement(r, &numReceivers)
+		if err != nil {
+			return err
+		}
+		a.ListSendingAllocationAmounts = make([]RangeAmountPairType, numReceivers)
+		for i := range a.ListSendingAllocationAmounts {
+			err = a.ListSendingAllocationAmounts[i].Deserialize(r)
+			if err != nil {
+				return err
+			}
 		}
 	}
 	return nil
