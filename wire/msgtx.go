@@ -1276,7 +1276,7 @@ func (a *AssetAllocationTupleType) Deserialize(r io.Reader) error {
 func (a *AssetAllocationType) Deserialize(r io.Reader, version int32) error {
 	// syscoin burn to ethereum is a unique tx that we need to deserialize as an asset allocation manually
 	if version == 0x7407 {
-		var SyscoinBurnToEthereumType syscoinBurnToEthereumType
+		var syscoinBurnToEthereumType SyscoinBurnToEthereumType
 		err := syscoinBurnToEthereumType.Deserialize(r)
 		if err != nil {
 			return err
