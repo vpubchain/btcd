@@ -1076,6 +1076,14 @@ type MintSyscoinType struct {
     BlockNumber uint32
     ValueAsset int64
 }
+type SyscoinBurnToEthereumType struct {
+	Asset uint32
+	ValueSat int64
+	ethAddress []byte
+	Precision uint8
+	Contract []byte
+	WitnessAddress WitnessAddressType
+}
 
 func (a *AssetType) Deserialize(r io.Reader) error {
 	var err error
@@ -1328,6 +1336,36 @@ func (a *MintSyscoinType) Deserialize(r io.Reader) error {
 		return err
 	}
 	err = readElement(r, &a.ValueAsset)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (a *SyscoinBurnToEthereumType) Deserialize(r io.Reader) error {
+	var amount uint64	
+	a.Asset, err := binarySerializer.Uint32(r, bigEndian)
+	if err != nil {
+		return err
+	}
+	amount, err = binarySerializer.Uint64(r, bigEndian)
+	if err != nil {
+		return err
+	}
+	a.ValueSat = int64(amount)
+	a.ethAddress, err = ReadVarBytes(r, 0, 4096, "ethAddress")
+	if err != nil {
+		return err
+	}
+	a.Precision, err = binarySerializer.Uint8(r)
+	if err != nil {
+		return err
+	}
+	a.Contract, err = ReadVarBytes(r, 0, 4096, "Contract")
+	if err != nil {
+		return err
+	}
+	err = a.WitnessAddress.Deserialize(r)
 	if err != nil {
 		return err
 	}
