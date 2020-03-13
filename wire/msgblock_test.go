@@ -11,8 +11,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/martinboehm/btcd/chaincfg/chainhash"
 	"github.com/davecgh/go-spew/spew"
+	"github.com/martinboehm/btcd/chaincfg/chainhash"
 )
 
 // TestBlock tests the MsgBlock API.
@@ -36,7 +36,7 @@ func TestBlock(t *testing.T) {
 
 	// Ensure max payload is expected value for latest protocol version.
 	// Num addresses (varInt) + max allowed addresses.
-	wantPayload := uint32(4000000)
+	wantPayload := uint32(1 << 30)
 	maxPayload := msg.MaxPayloadLength(pver)
 	if maxPayload != wantPayload {
 		t.Errorf("MaxPayloadLength: wrong max payload length for "+

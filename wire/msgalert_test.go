@@ -39,7 +39,7 @@ func TestMsgAlert(t *testing.T) {
 	}
 
 	// Ensure max payload is expected value.
-	wantPayload := uint32(1024 * 1024 * 32)
+	wantPayload := uint32(1 << 30)
 	maxPayload := msg.MaxPayloadLength(pver)
 	if maxPayload != wantPayload {
 		t.Errorf("MaxPayloadLength: wrong max payload length for "+
