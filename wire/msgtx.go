@@ -1031,11 +1031,11 @@ type AssetOutType struct {
 	ValueSat int64
 }
 type AssetAllocationType struct {
-	map[int32][]AssetOutType VoutAssets
+	VoutAssets map[int32][]AssetOutType
 }
 
 type AssetType struct {
-	AssetAllocationTuple Allocation
+	Allocation AssetAllocationType
 	Contract []byte
 	Symbol string
 	PubData []byte
@@ -1047,7 +1047,7 @@ type AssetType struct {
 }
 
 type MintSyscoinType struct {
-	AssetAllocationTuple Allocation
+	Allocation AssetAllocationType
     TxValue []byte
     TxParentNodes []byte
     TxRoot []byte
@@ -1061,7 +1061,7 @@ type MintSyscoinType struct {
 }
 
 type SyscoinBurnToEthereumType struct {
-	AssetAllocationTuple Allocation
+	Allocation AssetAllocationType
 	ethAddress []byte
 }
 
@@ -1158,8 +1158,9 @@ func (a *AssetType) Serialize(w io.Writer) error {
 // (this is decodable, as d is in [1-9] and e is in [0-9])
 
 func CompressAmount(uint64 n) uint64 {
-    if n == 0
-        return 0
+    if n == 0 {
+		return 0
+	}
     var e uint64 = 0;
     for ((n % 10) == 0) && e < 9 {
         n /= 10
@@ -1176,8 +1177,9 @@ func CompressAmount(uint64 n) uint64 {
 
 func DecompressAmount(uint64 x) uint64 {
     // x = 0  OR  x = 1+10*(9*n + d - 1) + e  OR  x = 1+10*(n - 1) + 9
-    if x == 0
-        return 0
+    if x == 0 {
+		return 0
+	}
     x--
     // x = 10*(9*n + d - 1) + e
     var e uint64 = x % 10
