@@ -1202,11 +1202,11 @@ func DecompressAmount(x uint64) uint64 {
 
 func (a *AssetOutType) Serialize(w io.Writer) error {
 	var err error
-	err = WriteVarInt(w, pver, uint64(a.N))
+	err = WriteVarInt(w, 0, uint64(a.N))
 	if err != nil {
 		return err
 	}
-	err = WriteVarInt(w, pver, CompressAmount(uint64(a.ValueSat)))
+	err = WriteVarInt(w, 0, CompressAmount(uint64(a.ValueSat)))
 	if err != nil {
 		return err
 	}
@@ -1215,12 +1215,12 @@ func (a *AssetOutType) Serialize(w io.Writer) error {
 
 func (a *AssetOutType) Deserialize(r io.Reader) error {
 	var err error
-	N, err := ReadVarInt(r, pver)
+	n, err := ReadVarInt(r, 0)
 	if err != nil {
 		return err
 	}
-	a.N = int32(N)
-	a.ValueSat, err = ReadVarInt(r, pver)
+	a.N = uint32(n)
+	a.ValueSat, err = ReadVarInt(r, 0)
 	if err != nil {
 		return err
 	}
@@ -1229,23 +1229,26 @@ func (a *AssetOutType) Deserialize(r io.Reader) error {
 }
 
 func (a *AssetAllocationType) Deserialize(r io.Reader) error {
-	numAssets, err := ReadVarInt(r, pver)
+	numAssets, err := ReadVarInt(r, 0)
 	if err != nil {
 		return err
 	}
 	a.VoutAssets = make(map[int32][]AssetOutType, numAssets)
-	for i := 0; i < numAssets; i++ {
+	for i := 0; i < int(numAssets); i++ {
 		var assetGuid int32
 		err = readElement(r, &assetGuid)
 		if err != nil {
 			return err
 		}
-		numOutputs, err := ReadVarInt(r, pver)
+		numOutputs, err := ReadVarInt(r, 0)
 		if err != nil {
 			return err
 		}
-		assetOutArray := &a.VoutAssets[assetGuid] 
-		assetOutArray = make([]AssetOutType, numOutputs)
+		assetOutArray, ok := a.VoutAssets[assetGuid]
+		if !ok {
+			assetOutArray = make([]AssetOutType, numOutputs)
+			a.VoutAssets[assetGuid] = assetOutArray
+		}
 		for j := 0; j < numOutputs; j++ {
 			err = assetOutArray[j].Deserialize(r)
 			if err != nil {
@@ -1257,7 +1260,7 @@ func (a *AssetAllocationType) Deserialize(r io.Reader) error {
 }
 
 func (a *AssetAllocationType) Serialize(w io.Writer) error {
-	err := WriteVarInt(r, pver, uint64(len(a.VoutAssets)))
+	err := WriteVarInt(r, 0, uint64(len(a.VoutAssets)))
 	if err != nil {
 		return err
 	}
@@ -1266,7 +1269,7 @@ func (a *AssetAllocationType) Serialize(w io.Writer) error {
 		if err != nil {
 			return err
 		}
-		err = WriteVarInt(r, pver, uint64(len(v)))
+		err = WriteVarInt(r, 0, uint64(len(v)))
 		if err != nil {
 			return err
 		}
