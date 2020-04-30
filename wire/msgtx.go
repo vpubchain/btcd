@@ -1026,35 +1026,18 @@ func writeTxWitness(w io.Writer, pver uint32, version int32, wit [][]byte) error
 	}
 	return nil
 }
-
-type WitnessAddressType struct {
-	Version uint8
-	WitnessProgram []byte
-}
-
-type RangeAmountPairType struct {
-	WitnessAddress WitnessAddressType
+type AssetOutType struct {
+	N uint32
 	ValueSat int64
 }
-
-type AssetAllocationTupleType struct {
-	Asset uint32
-	WitnessAddress WitnessAddressType
-}
-
 type AssetAllocationType struct {
-	AssetAllocationTuple AssetAllocationTupleType
-	ListSendingAllocationAmounts []RangeAmountPairType
+	map[int32][]AssetOutType VoutAssets
 }
 
 type AssetType struct {
-	Asset uint32
-	WitnessAddress WitnessAddressType
-	WitnessAddressTransfer WitnessAddressType
+	AssetAllocationTuple Allocation
 	Contract []byte
 	Symbol string
-	TxHash  chainhash.Hash
-	Height uint32
 	PubData []byte
 	Balance int64
 	TotalSupply int64
@@ -1064,7 +1047,7 @@ type AssetType struct {
 }
 
 type MintSyscoinType struct {
-	AssetAllocationTuple AssetAllocationTupleType
+	AssetAllocationTuple Allocation
     TxValue []byte
     TxParentNodes []byte
     TxRoot []byte
@@ -1074,41 +1057,38 @@ type MintSyscoinType struct {
     ReceiptRoot []byte
     ReceiptPath []byte
     BlockNumber uint32
-    ValueAsset int64
+    BridgeTransferId uint32
 }
+
 type SyscoinBurnToEthereumType struct {
-	Asset uint32
-	ValueSat int64
+	AssetAllocationTuple Allocation
 	ethAddress []byte
-	Precision uint8
-	Contract []byte
-	WitnessAddress WitnessAddressType
 }
 
 func (a *AssetType) Deserialize(r io.Reader) error {
 	var err error
+	err = a.Allocation.Deserialize(r)
+	if err != nil {
+		return err
+	}
+	err = readElement(r, &a.Precision)
+	if err != nil {
+		return err
+	}
+	a.Contract, err = ReadVarBytes(r, 0, 20, "Contract")
+	if err != nil {
+		return err
+	}
 	a.PubData, err = ReadVarBytes(r, 0, 512, "PubData")
 	if err != nil {
 		return err
 	}
-	err = readElement(r, &a.TxHash)
+	symbol, err := ReadVarBytes(r, 0, 8, "Symbol")
 	if err != nil {
 		return err
-	}
-	err = readElement(r, &a.Asset)
-	if err != nil {
-		return err
-	}
-	symbol, er := ReadVarBytes(r, 0, 8, "Symbol")
-	if er != nil {
-		return er
 	}
 	a.Symbol = string(symbol)
-	err = a.WitnessAddress.Deserialize(r)
-	if err != nil {
-		return err
-	}
-	err = a.WitnessAddressTransfer.Deserialize(r)
+	err = readElement(r, &a.UpdateFlags)
 	if err != nil {
 		return err
 	}
@@ -1124,36 +1104,25 @@ func (a *AssetType) Deserialize(r io.Reader) error {
 	if err != nil {
 		return err
 	}
-	err = readElement(r, &a.Height)
-	if err != nil {
-		return err
-	}
-	err = readElement(r, &a.UpdateFlags)
-	if err != nil {
-		return err
-	}
-	err = readElement(r, &a.Precision)
-	if err != nil {
-		return err
-	}
-	a.Contract, err = ReadVarBytes(r, 0, 20, "Contract")
-	if err != nil {
-		return err
-	}
+
 	return nil
 }
 
 func (a *AssetType) Serialize(w io.Writer) error {
 	var err error
+	err = a.Allocation.Serialize(w)
+	if err != nil {
+		return err
+	}
+	err = writeElement(w, a.Precision)
+	if err != nil {
+		return err
+	}
+	err = WriteVarBytes(w, 0, a.Contract)
+	if err != nil {
+		return err
+	}
 	err = WriteVarBytes(w, 0, a.PubData)
-	if err != nil {
-		return err
-	}
-	err = writeElement(w, a.TxHash)
-	if err != nil {
-		return err
-	}
-	err = writeElement(w, a.Asset)
 	if err != nil {
 		return err
 	}
@@ -1161,11 +1130,7 @@ func (a *AssetType) Serialize(w io.Writer) error {
 	if err != nil {
 		return err
 	}
-	err = a.WitnessAddress.Serialize(w)
-	if err != nil {
-		return err
-	}
-	err = a.WitnessAddressTransfer.Serialize(w)
+	err = writeElement(w, a.UpdateFlags)
 	if err != nil {
 		return err
 	}
@@ -1181,122 +1146,131 @@ func (a *AssetType) Serialize(w io.Writer) error {
 	if err != nil {
 		return err
 	}
-	err = writeElement(w, a.Height)
+	return nil
+}
+// Amount compression:
+// * If the amount is 0, output 0
+// * first, divide the amount (in base units) by the largest power of 10 possible; call the exponent e (e is max 9)
+// * if e<9, the last digit of the resulting number cannot be 0; store it as d, and drop it (divide by 10)
+//   * call the result n
+//   * output 1 + 10*(9*n + d - 1) + e
+// * if e==9, we only know the resulting number is not zero, so output 1 + 10*(n - 1) + 9
+// (this is decodable, as d is in [1-9] and e is in [0-9])
+
+func CompressAmount(uint64 n) uint64 {
+    if n == 0
+        return 0
+    var e uint64 = 0;
+    for ((n % 10) == 0) && e < 9 {
+        n /= 10
+        e++
+    }
+    if e < 9 {
+        var d uint64 = (n % 10)
+        n /= 10
+        return 1 + (n*9 + d - 1)*10 + e
+    } else {
+        return 1 + (n - 1)*10 + 9
+    }
+}
+
+func DecompressAmount(uint64 x) uint64 {
+    // x = 0  OR  x = 1+10*(9*n + d - 1) + e  OR  x = 1+10*(n - 1) + 9
+    if x == 0
+        return 0
+    x--
+    // x = 10*(9*n + d - 1) + e
+    var e uint64 = x % 10
+    x /= 10
+    var n uint64 = 0
+    if e < 9 {
+        // x = 9*n + d - 1
+        var d uint64 = (x % 9) + 1
+        x /= 9
+        // x = n
+        n = x*10 + d
+    } else {
+        n = x+1
+    }
+    for e > 0 {
+        n *= 10
+        e--
+    }
+    return n
+}
+
+func (a *AssetOutType) Serialize(r io.Writer) error {
+	var err error
+	err = WriteVarInt(w, pver, uint64(a.N))
 	if err != nil {
 		return err
 	}
-	err = writeElement(w, a.UpdateFlags)
-	if err != nil {
-		return err
-	}
-	err = writeElement(w, a.Precision)
-	if err != nil {
-		return err
-	}
-	err = WriteVarBytes(w, 0, a.Contract)
+	err = WriteVarInt(w, pver, CompressAmount(a.ValueSat))
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (a *WitnessAddressType) Serialize(w io.Writer) error {
-	err := writeElement(w, a.Version)
+func (a *AssetOutType) Deserialize(r io.Reader) error {
+	var err error
+	N, err := ReadVarInt(r, pver)
 	if err != nil {
 		return err
 	}
-	err = WriteVarBytes(w, 0, a.WitnessProgram)
+	a.N = int32(N)
+	a.ValueSat, err = ReadVarInt(r, pver)
 	if err != nil {
 		return err
 	}
+	a.ValueSat = DecompressAmount(a.ValueSat)
 	return nil
 }
 
-func (a *WitnessAddressType) Deserialize(r io.Reader) error {
-	err := readElement(r, &a.Version)
+func (a *AssetAllocationType) Deserialize(r io.Reader) error {
+	numAssets, err := ReadVarInt(r, pver)
 	if err != nil {
 		return err
 	}
-	a.WitnessProgram, err = ReadVarBytes(r, 0, 256, "WitnessProgram")
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func (m *WitnessAddressType) ToString(hrp string) string {
-	if m != nil {
-		if len(m.WitnessProgram) <= 4 && string(m.WitnessProgram) == "burn" {
-			return "burn"
-		}
-		// Convert data to base32:
-		conv, err := bech32.ConvertBits([]byte(m.WitnessProgram), 8, 5, true)
-		if err != nil {
-			return ""
-		}
-		// Concatenate the witness version and program, and encode the resulting
-		// bytes using bech32 encoding.
-		combined := make([]byte, len(conv)+1)
-		combined[0] = m.Version
-		copy(combined[1:], conv)
-
-		encoded, err := bech32.Encode(hrp, combined)
-		if err != nil {
-			return ""
-		}
-		return encoded
-	}
-	return ""
-}
-
-func (a *RangeAmountPairType) Deserialize(r io.Reader) error {
-	err := a.WitnessAddress.Deserialize(r)
-	if err != nil {
-		return err
-	}
-	err = readElement(r, &a.ValueSat)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func (a *AssetAllocationTupleType) Deserialize(r io.Reader) error {
-	err := readElement(r, &a.Asset)
-	if err != nil {
-		return err
-	}
-	err = a.WitnessAddress.Deserialize(r)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func (a *AssetAllocationType) Deserialize(r io.Reader, version int32) error {
-	// syscoin burn to ethereum is a unique tx that we need to deserialize as an asset allocation manually
-	if version == 0x7407 {
-		var syscoinBurnToEthereumType SyscoinBurnToEthereumType
-		err := syscoinBurnToEthereumType.Deserialize(r)
+	a.VoutAssets := make(map[int32][]AssetOutType, numAssets)
+	for i := 0; i < numAssets; i++ {
+		var assetGuid int32
+		err = readElement(r, &assetGuid)
 		if err != nil {
 			return err
 		}
-		a.AssetAllocationTuple = AssetAllocationTupleType{Asset: syscoinBurnToEthereumType.Asset, WitnessAddress: syscoinBurnToEthereumType.WitnessAddress}
-		a.ListSendingAllocationAmounts = make([]RangeAmountPairType, 1)
-		a.ListSendingAllocationAmounts[0] = RangeAmountPairType{WitnessAddress: WitnessAddressType{Version: 0, WitnessProgram: ([]byte)("burn")}, ValueSat: syscoinBurnToEthereumType.ValueSat}
-	} else {
-		err := a.AssetAllocationTuple.Deserialize(r)
+		numOutputs, err := ReadVarInt(r, pver)
 		if err != nil {
 			return err
 		}
-		var numReceivers uint8
-		err = readElement(r, &numReceivers)
+		assetOutArray := &a.VoutAssets[assetGuid] 
+		assetOutArray = make([]AssetOutType, numOutputs)
+		for j := 0; j < numOutputs; j++ {
+			err = assetOutArray[j].Deserialize(r)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+func (a *AssetAllocationType) Serialize(w io.Writer) error {
+	err := WriteVarInt(r, pver, uint64(len(a.VoutAssets)))
+	if err != nil {
+		return err
+	}
+	for k, v := range a.VoutAssets {
+		err = writeElement(w, k)
 		if err != nil {
 			return err
 		}
-		a.ListSendingAllocationAmounts = make([]RangeAmountPairType, numReceivers)
-		for i := range a.ListSendingAllocationAmounts {
-			err = a.ListSendingAllocationAmounts[i].Deserialize(r)
+		err = WriteVarInt(r, pver, uint64(len(v)))
+		if err != nil {
+			return err
+		}
+		for voutAsset := range v {
+			err = voutAsset.Serialize(w)
 			if err != nil {
 				return err
 			}
@@ -1307,6 +1281,18 @@ func (a *AssetAllocationType) Deserialize(r io.Reader, version int32) error {
 
 func (a *MintSyscoinType) Deserialize(r io.Reader) error {
 	var err error
+	err = a.Allocation.Deserialize(r)
+	if err != nil {
+		return err
+	}
+	err = readElement(r, &a.BridgeTransferId)
+	if err != nil {
+		return err
+	}
+	err = readElement(r, &a.BlockNumber)
+	if err != nil {
+		return err
+	}
 	a.TxValue, err = ReadVarBytes(r, 0, 4096, "TxValue")
 	if err != nil {
 		return err
@@ -1339,15 +1325,52 @@ func (a *MintSyscoinType) Deserialize(r io.Reader) error {
 	if err != nil {
 		return err
 	}
-	err = readElement(r, &a.BlockNumber)
+	return nil
+}
+
+func (a *MintSyscoinType) Serialize(w io.Writer) error {
+	var err error
+	err = a.Allocation.Serialize(r)
 	if err != nil {
 		return err
 	}
-	err = a.AssetAllocationTuple.Deserialize(r)
+	err = writeElement(w, a.BridgeTransferId)
 	if err != nil {
 		return err
 	}
-	err = readElement(r, &a.ValueAsset)
+	err = writeElement(w, a.BlockNumber)
+	if err != nil {
+		return err
+	}
+	err = WriteVarBytes(w, 0, a.TxValue)
+	if err != nil {
+		return err
+	}
+	err = WriteVarBytes(w, 0, a.TxParentNodes)
+	if err != nil {
+		return err
+	}
+	err = WriteVarBytes(w, 0, a.TxRoot)
+	if err != nil {
+		return err
+	}
+	err = WriteVarBytes(w, 0, a.TxPath)
+	if err != nil {
+		return err
+	}
+	err = WriteVarBytes(w, 0, a.ReceiptValue)
+	if err != nil {
+		return err
+	}
+	err = WriteVarBytes(w, 0, a.ReceiptParentNodes)
+	if err != nil {
+		return err
+	}
+	err = WriteVarBytes(w, 0, a.ReceiptRoot)
+	if err != nil {
+		return err
+	}
+	err = WriteVarBytes(w, 0, a.ReceiptPath)
 	if err != nil {
 		return err
 	}
@@ -1355,47 +1378,25 @@ func (a *MintSyscoinType) Deserialize(r io.Reader) error {
 }
 
 func (a *SyscoinBurnToEthereumType) Deserialize(r io.Reader) error {
-	var amount uint64
 	var err error
-	// get varint bytes as throwaway between each field
-	_, err = binarySerializer.Uint8(r)
+	err = a.Allocation.Deserialize(r)
 	if err != nil {
 		return err
 	}
-	a.Asset, err = binarySerializer.Uint32(r, bigEndian)
+	a.ethAddress, err = ReadVarBytes(r, 0, 20, "ethAddress")
 	if err != nil {
 		return err
 	}
-	_, err = binarySerializer.Uint8(r)
+	return nil
+}
+
+func (a *SyscoinBurnToEthereumType) Serialize(w io.Writer) error {
+	var err error
+	err = a.Allocation.Serialize(w)
 	if err != nil {
 		return err
 	}
-	amount, err = binarySerializer.Uint64(r, bigEndian)
-	if err != nil {
-		return err
-	}
-	a.ValueSat = int64(amount)
-	a.ethAddress, err = ReadVarBytes(r, 0, 4096, "ethAddress")
-	if err != nil {
-		return err
-	}
-	_, err = binarySerializer.Uint8(r)
-	if err != nil {
-		return err
-	}
-	a.Precision, err = binarySerializer.Uint8(r)
-	if err != nil {
-		return err
-	}
-	a.Contract, err = ReadVarBytes(r, 0, 4096, "Contract")
-	if err != nil {
-		return err
-	}
-	_, err = binarySerializer.Uint8(r)
-	if err != nil {
-		return err
-	}
-	err = a.WitnessAddress.Deserialize(r)
+	err = WriteVarBytes(w, 0, a.ethAddress)
 	if err != nil {
 		return err
 	}
