@@ -1274,7 +1274,7 @@ func (a *AssetAllocationType) Serialize(w io.Writer) error {
 		if err != nil {
 			return err
 		}
-		for voutAsset := range v {
+		for ,voutAsset := range v {
 			err = voutAsset.Serialize(w)
 			if err != nil {
 				return err
