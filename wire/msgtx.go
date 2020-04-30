@@ -1220,7 +1220,8 @@ func (a *AssetOutType) Deserialize(r io.Reader) error {
 		return err
 	}
 	a.N = uint32(n)
-	a.ValueSat, err = ReadVarInt(r, 0)
+	valueSat, err := ReadVarInt(r, 0)
+	a.ValueSat = int64(valueSat)
 	if err != nil {
 		return err
 	}
@@ -1249,7 +1250,7 @@ func (a *AssetAllocationType) Deserialize(r io.Reader) error {
 			assetOutArray = make([]AssetOutType, numOutputs)
 			a.VoutAssets[assetGuid] = assetOutArray
 		}
-		for j := 0; j < numOutputs; j++ {
+		for j := 0; j < int(numOutputs); j++ {
 			err = assetOutArray[j].Deserialize(r)
 			if err != nil {
 				return err
@@ -1260,7 +1261,7 @@ func (a *AssetAllocationType) Deserialize(r io.Reader) error {
 }
 
 func (a *AssetAllocationType) Serialize(w io.Writer) error {
-	err := WriteVarInt(r, 0, uint64(len(a.VoutAssets)))
+	err := WriteVarInt(w, 0, uint64(len(a.VoutAssets)))
 	if err != nil {
 		return err
 	}
@@ -1269,7 +1270,7 @@ func (a *AssetAllocationType) Serialize(w io.Writer) error {
 		if err != nil {
 			return err
 		}
-		err = WriteVarInt(r, 0, uint64(len(v)))
+		err = WriteVarInt(w, 0, uint64(len(v)))
 		if err != nil {
 			return err
 		}
@@ -1334,7 +1335,7 @@ func (a *MintSyscoinType) Deserialize(r io.Reader) error {
 
 func (a *MintSyscoinType) Serialize(w io.Writer) error {
 	var err error
-	err = a.Allocation.Serialize(r)
+	err = a.Allocation.Serialize(w)
 	if err != nil {
 		return err
 	}
