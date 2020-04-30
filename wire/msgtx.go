@@ -11,7 +11,6 @@ import (
 	"strconv"
 
 	"github.com/martinboehm/btcd/chaincfg/chainhash"
-	"github.com/martinboehm/btcutil/bech32"
 )
 
 const (
@@ -1157,7 +1156,7 @@ func (a *AssetType) Serialize(w io.Writer) error {
 // * if e==9, we only know the resulting number is not zero, so output 1 + 10*(n - 1) + 9
 // (this is decodable, as d is in [1-9] and e is in [0-9])
 
-func CompressAmount(uint64 n) uint64 {
+func CompressAmount(n uint64) uint64 {
     if n == 0 {
 		return 0
 	}
@@ -1175,7 +1174,7 @@ func CompressAmount(uint64 n) uint64 {
     }
 }
 
-func DecompressAmount(uint64 x) uint64 {
+func DecompressAmount(x uint64) uint64 {
     // x = 0  OR  x = 1+10*(9*n + d - 1) + e  OR  x = 1+10*(n - 1) + 9
     if x == 0 {
 		return 0
@@ -1234,7 +1233,7 @@ func (a *AssetAllocationType) Deserialize(r io.Reader) error {
 	if err != nil {
 		return err
 	}
-	a.VoutAssets := make(map[int32][]AssetOutType, numAssets)
+	a.VoutAssets = make(map[int32][]AssetOutType, numAssets)
 	for i := 0; i < numAssets; i++ {
 		var assetGuid int32
 		err = readElement(r, &assetGuid)
