@@ -1200,13 +1200,13 @@ func DecompressAmount(x uint64) uint64 {
     return n
 }
 
-func (a *AssetOutType) Serialize(r io.Writer) error {
+func (a *AssetOutType) Serialize(w io.Writer) error {
 	var err error
 	err = WriteVarInt(w, pver, uint64(a.N))
 	if err != nil {
 		return err
 	}
-	err = WriteVarInt(w, pver, CompressAmount(a.ValueSat))
+	err = WriteVarInt(w, pver, CompressAmount(uint64(a.ValueSat)))
 	if err != nil {
 		return err
 	}
@@ -1224,7 +1224,7 @@ func (a *AssetOutType) Deserialize(r io.Reader) error {
 	if err != nil {
 		return err
 	}
-	a.ValueSat = DecompressAmount(a.ValueSat)
+	a.ValueSat = int64(DecompressAmount(uint64(a.ValueSat)))
 	return nil
 }
 
