@@ -1036,13 +1036,16 @@ type AssetAllocationType struct {
 type AssetType struct {
 	Allocation AssetAllocationType
 	Contract []byte
+	PrevContract  []byte
 	Symbol string
 	PubData []byte
+	PrevPubData []byte
 	Balance int64
 	TotalSupply int64
 	MaxSupply int64
 	Precision uint8
 	UpdateFlags uint8
+	PrevUpdateFlags uint8
 }
 
 type MintSyscoinType struct {
@@ -1091,6 +1094,18 @@ func (a *AssetType) Deserialize(r io.Reader) error {
 	if err != nil {
 		return err
 	}
+	a.PrevContract, err = ReadVarBytes(r, 0, 20, "PrevContract")
+	if err != nil {
+		return err
+	}
+	a.PrevPubData, err = ReadVarBytes(r, 0, 512, "PrevPubData")
+	if err != nil {
+		return err
+	}
+	err = readElement(r, &a.PrevUpdateFlags)
+	if err != nil {
+		return err
+	}
 	err = readElement(r, &a.Balance)
 	if err != nil {
 		return err
@@ -1130,6 +1145,18 @@ func (a *AssetType) Serialize(w io.Writer) error {
 		return err
 	}
 	err = writeElement(w, a.UpdateFlags)
+	if err != nil {
+		return err
+	}
+	err = WriteVarBytes(w, 0, a.PrevContract)
+	if err != nil {
+		return err
+	}
+	err = WriteVarBytes(w, 0, a.PrevPubData)
+	if err != nil {
+		return err
+	}
+	err = writeElement(w, a.PrevUpdateFlags)
 	if err != nil {
 		return err
 	}
