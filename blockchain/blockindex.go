@@ -13,7 +13,7 @@ import (
 	"github.com/martinboehm/btcd/chaincfg"
 	"github.com/martinboehm/btcd/chaincfg/chainhash"
 	"github.com/martinboehm/btcd/database"
-	"github.com/martinboehm/btcd/wire"
+	"github.com/syscoin/btcd/wire"
 )
 
 // blockStatus is a bit field representing the validation state of the block.

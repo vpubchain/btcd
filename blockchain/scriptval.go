@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"github.com/martinboehm/btcd/txscript"
-	"github.com/martinboehm/btcd/wire"
+	"github.com/syscoin/btcd/wire"
 	"github.com/martinboehm/btcutil"
 )
 

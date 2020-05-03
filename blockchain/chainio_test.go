@@ -12,7 +12,7 @@ import (
 	"testing"
 
 	"github.com/martinboehm/btcd/database"
-	"github.com/martinboehm/btcd/wire"
+	"github.com/syscoin/btcd/wire"
 )
 
 // TestErrNotInMainChain ensures the functions related to errNotInMainChain work
