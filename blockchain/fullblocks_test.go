@@ -19,7 +19,7 @@ import (
 	"github.com/martinboehm/btcd/database"
 	_ "github.com/martinboehm/btcd/database/ffldb"
 	"github.com/martinboehm/btcd/txscript"
-	"github.com/syscoin/btcd/wire"
+	"github.com/martinboehm/btcd/wire"
 	"github.com/martinboehm/btcutil"
 )
 
