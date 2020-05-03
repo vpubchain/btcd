@@ -1073,10 +1073,7 @@ func (a *AssetType) Deserialize(r io.Reader) error {
 	if err != nil {
 		return err
 	}
-	err = readElement(r, &a.Precision)
-	if err != nil {
-		return err
-	}
+	a.Precision, err = binarySerializer.Uint8(r)
 	a.Contract, err = ReadVarBytes(r, 0, 20, "Contract")
 	if err != nil {
 		return err
@@ -1090,7 +1087,7 @@ func (a *AssetType) Deserialize(r io.Reader) error {
 		return err
 	}
 	a.Symbol = string(symbol)
-	err = readElement(r, &a.UpdateFlags)
+	a.UpdateFlags, err = binarySerializer.Uint8(r)
 	if err != nil {
 		return err
 	}
@@ -1102,7 +1099,7 @@ func (a *AssetType) Deserialize(r io.Reader) error {
 	if err != nil {
 		return err
 	}
-	err = readElement(r, &a.PrevUpdateFlags)
+	a.PrevUpdateFlags, err = binarySerializer.Uint8(r)
 	if err != nil {
 		return err
 	}
@@ -1128,7 +1125,7 @@ func (a *AssetType) Serialize(w io.Writer) error {
 	if err != nil {
 		return err
 	}
-	err = writeElement(w, a.Precision)
+	err := binarySerializer.PutUint8(w, a.Precision)
 	if err != nil {
 		return err
 	}
@@ -1144,7 +1141,7 @@ func (a *AssetType) Serialize(w io.Writer) error {
 	if err != nil {
 		return err
 	}
-	err = writeElement(w, a.UpdateFlags)
+	err := binarySerializer.PutUint8(w, a.UpdateFlags)
 	if err != nil {
 		return err
 	}
@@ -1156,7 +1153,7 @@ func (a *AssetType) Serialize(w io.Writer) error {
 	if err != nil {
 		return err
 	}
-	err = writeElement(w, a.PrevUpdateFlags)
+	err := binarySerializer.PutUint8(w, a.PrevUpdateFlags)
 	if err != nil {
 		return err
 	}
