@@ -1125,7 +1125,7 @@ func (a *AssetType) Serialize(w io.Writer) error {
 	if err != nil {
 		return err
 	}
-	err := binarySerializer.PutUint8(w, a.Precision)
+	err = binarySerializer.PutUint8(w, a.Precision)
 	if err != nil {
 		return err
 	}
@@ -1141,7 +1141,7 @@ func (a *AssetType) Serialize(w io.Writer) error {
 	if err != nil {
 		return err
 	}
-	err := binarySerializer.PutUint8(w, a.UpdateFlags)
+	err = binarySerializer.PutUint8(w, a.UpdateFlags)
 	if err != nil {
 		return err
 	}
@@ -1153,7 +1153,7 @@ func (a *AssetType) Serialize(w io.Writer) error {
 	if err != nil {
 		return err
 	}
-	err := binarySerializer.PutUint8(w, a.PrevUpdateFlags)
+	err = binarySerializer.PutUint8(w, a.PrevUpdateFlags)
 	if err != nil {
 		return err
 	}
