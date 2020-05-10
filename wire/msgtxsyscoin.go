@@ -5,11 +5,7 @@
 package wire
 
 import (
-	"bytes"
-	"fmt"
 	"io"
-	"strconv"
-	"github.com/martinboehm/btcd/wire"
 )
 
 type AssetOutType struct {
