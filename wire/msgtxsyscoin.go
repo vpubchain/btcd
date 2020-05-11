@@ -140,25 +140,22 @@ func (a *AssetType) Deserialize(r io.Reader) error {
 		return err
 	}
 	valueSat, err := ReadVarInt(r, 0)
-	a.Balance = int64(valueSat)
 	if err != nil {
 		return err
 	}
-	a.Balance = int64(DecompressAmount(uint64(a.Balance)))
+	a.Balance = int64(DecompressAmount(valueSat))
 
 	valueSat, err = ReadVarInt(r, 0)
-	a.TotalSupply = int64(valueSat)
 	if err != nil {
 		return err
 	}
-	a.TotalSupply = int64(DecompressAmount(uint64(a.TotalSupply)))
+	a.TotalSupply = int64(DecompressAmount(valueSat))
 	
 	valueSat, err = ReadVarInt(r, 0)
-	a.MaxSupply = int64(valueSat)
 	if err != nil {
 		return err
 	}
-	//a.MaxSupply = int64(DecompressAmount(uint64(a.MaxSupply)))
+	a.MaxSupply = int64(DecompressAmount(valueSat))
 
 	return nil
 }
