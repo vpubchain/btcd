@@ -51,14 +51,14 @@ type SyscoinBurnToEthereumType struct {
 	EthAddress []byte
 }
 
-func PutUint(w io.Writer, n uint64) error
-{
+func PutUint(w io.Writer, n uint64) error {
     tmp := make([]uint8, (len(n)*8+6)/7)
     var len int=0
     for  {
         tmp[len] = (n & 0x7F) | (len ? 0x80 : 0x00)
-        if (n <= 0x7F)
-            break
+        if (n <= 0x7F) {
+			break
+		}
         n = (n >> 7) - 1
         len++
 	}
@@ -70,8 +70,7 @@ func PutUint(w io.Writer, n uint64) error
 	}
 }
 
-func ReadUint(r io.Reader) (uint64, error)
-{
+func ReadUint(r io.Reader) (uint64, error) {
     var n uint64 = 0
     for {
 		chData, err := binarySerializer.Uint8(r)
