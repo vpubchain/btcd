@@ -66,8 +66,9 @@ func PutUint(w io.Writer, n uint64) error {
         n = (n >> 7) - 1
         len++
 	}
-	for i := len; i >= 0; i-- {
-		err := binarySerializer.PutUint8(w, tmp[i])
+	for len > 0 {
+		len--
+		err := binarySerializer.PutUint8(w, tmp[len])
 		if err != nil {
 			return err
 		}
