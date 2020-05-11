@@ -6,6 +6,7 @@ package wire
 
 import (
 	"io"
+	vlq "github.com/bsm/go-vlq"
 )
 
 type AssetOutType struct {
@@ -103,6 +104,7 @@ func DecompressAmount(x uint64) uint64 {
     return n
 }
 
+
 func (a *AssetType) Deserialize(r io.Reader) error {
 	var err error
 	err = a.Allocation.Deserialize(r)
@@ -139,19 +141,19 @@ func (a *AssetType) Deserialize(r io.Reader) error {
 	if err != nil {
 		return err
 	}
-	valueSat, err := ReadVarInt(r, 0)
+	valueSat, err := vlq.ReadUint(r)
 	if err != nil {
 		return err
 	}
 	a.Balance = int64(DecompressAmount(valueSat))
 
-	valueSat, err = ReadVarInt(r, 0)
+	valueSat, err = vlq.ReadUint(r)
 	if err != nil {
 		return err
 	}
 	a.TotalSupply = int64(DecompressAmount(valueSat))
 	
-	valueSat, err = ReadVarInt(r, 0)
+	valueSat, err = vlq.ReadUint(r)
 	if err != nil {
 		return err
 	}
@@ -198,21 +200,24 @@ func (a *AssetType) Serialize(w io.Writer) error {
 	if err != nil {
 		return err
 	}
-	err = WriteVarInt(w, 0, CompressAmount(uint64(a.Balance)))
+	buf := make([]byte, 8)
+	vlq.PutUint(buf, CompressAmount(uint64(a.Balance)))
+	_, err = w.Write(buf)
 	if err != nil {
 		return err
 	}
-	err = WriteVarInt(w, 0, CompressAmount(uint64(a.TotalSupply)))
+	vlq.PutUint(buf, CompressAmount(uint64(a.TotalSupply)))
+	_, err = w.Write(buf)
 	if err != nil {
 		return err
 	}
-	err = WriteVarInt(w, 0, CompressAmount(uint64(a.MaxSupply)))
+	vlq.PutUint(buf, CompressAmount(uint64(a.MaxSupply)))
+	_, err = w.Write(buf)
 	if err != nil {
 		return err
 	}
 	return nil
 }
-
 
 
 func (a *AssetAllocationType) Deserialize(r io.Reader) error {
@@ -272,11 +277,14 @@ func (a *AssetAllocationType) Serialize(w io.Writer) error {
 
 func (a *AssetOutType) Serialize(w io.Writer) error {
 	var err error
-	err = WriteVarInt(w, 0, uint64(a.N))
+	buf := make([]byte, 8)
+	vlq.PutUint(buf, uint64(a.N))
+	_, err = w.Write(buf)
 	if err != nil {
 		return err
 	}
-	err = WriteVarInt(w, 0, CompressAmount(uint64(a.ValueSat)))
+	vlq.PutUint(buf, CompressAmount(uint64(a.ValueSat)))
+	_, err = w.Write(buf)
 	if err != nil {
 		return err
 	}
@@ -285,17 +293,16 @@ func (a *AssetOutType) Serialize(w io.Writer) error {
 
 func (a *AssetOutType) Deserialize(r io.Reader) error {
 	var err error
-	n, err := ReadVarInt(r, 0)
+	n, err := vlq.ReadUint(r)
 	if err != nil {
 		return err
 	}
 	a.N = uint32(n)
-	valueSat, err := ReadVarInt(r, 0)
-	a.ValueSat = int64(valueSat)
+	valueSat, err := vlq.ReadUint(r)
 	if err != nil {
 		return err
 	}
-	a.ValueSat = int64(DecompressAmount(uint64(a.ValueSat)))
+	a.ValueSat = int64(DecompressAmount(valueSat))
 	return nil
 }
 
