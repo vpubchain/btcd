@@ -50,43 +50,42 @@ type SyscoinBurnToEthereumType struct {
 	Allocation AssetAllocationType
 	EthAddress []byte
 }
-var overflow = errors.New("vlq: number overflows a 64-bit integer")
 
-// PutUint encodes a uint64 into buf and returns the number of bytes written.
-// If the buffer is too small, PutUint will panic.
-func PutUint(buf []byte, x uint64) int {
-	var n uint
-	for n = 9; n > 0; n-- {
-		if x >= 1<<(n*7) {
-			break
-		}
+func PutUint(w io.Writer, n uint64) error
+{
+    tmp := make([]uint8, (len(n)*8+6)/7)
+    var len int=0
+    for  {
+        tmp[len] = (n & 0x7F) | (len ? 0x80 : 0x00)
+        if (n <= 0x7F)
+            break
+        n = (n >> 7) - 1
+        len++
 	}
-
-	i := int(n) + 1
-	buf[n] = byte(x) & 0x7F
-	for n > 0 {
-		n--
-		x >>= 7
-		buf[n] = byte(x) | 0x80
-	}
-	return i
-}
-// ReadUint reads an encoded unsigned integer from r and returns it as a uint64.
-func ReadUint(r io.Reader) (uint64, error) {
-	var x uint64
-	for i := 0; ; i++ {
-		b, err := binarySerializer.Uint8(r)
+	for n = len; n >= 0; n-- {
+		err = binarySerializer.PutUint8(w, tmp[len])
 		if err != nil {
-			return x, err
-		}
-		x = (x << 7) | uint64(b&0x7f)
-
-		if b < 0x80 {
-			return x, nil
-		} else if i == 9 {
-			return 0, overflow
+			return err
 		}
 	}
+}
+
+func ReadUint(r io.Reader) (uint64, error)
+{
+    var n uint64 = 0
+    for {
+		chData, err := binarySerializer.Uint8(r)
+		if err != nil {
+			return 0, err
+		}
+        n = (n << 7) | (chData & 0x7F)
+        if (chData & 0x80) {
+            n++
+        } else {
+            return n, nil
+        }
+	}
+	return n, nil
 }
 // Amount compression:
 // * If the amount is 0, output 0
@@ -237,19 +236,15 @@ func (a *AssetType) Serialize(w io.Writer) error {
 	if err != nil {
 		return err
 	}
-	buf := make([]byte, 8)
-	PutUint(buf, CompressAmount(uint64(a.Balance)))
-	_, err = w.Write(buf)
+	err = PutUint(w, CompressAmount(uint64(a.Balance)))
 	if err != nil {
 		return err
 	}
-	PutUint(buf, CompressAmount(uint64(a.TotalSupply)))
-	_, err = w.Write(buf)
+	err = PutUint(w, CompressAmount(uint64(a.TotalSupply)))
 	if err != nil {
 		return err
 	}
-	PutUint(buf, CompressAmount(uint64(a.MaxSupply)))
-	_, err = w.Write(buf)
+	err = PutUint(w, CompressAmount(uint64(a.MaxSupply)))
 	if err != nil {
 		return err
 	}
@@ -314,14 +309,11 @@ func (a *AssetAllocationType) Serialize(w io.Writer) error {
 
 func (a *AssetOutType) Serialize(w io.Writer) error {
 	var err error
-	buf := make([]byte, 8)
-	PutUint(buf, uint64(a.N))
-	_, err = w.Write(buf)
+	err = PutUint(buf, uint64(a.N))
 	if err != nil {
 		return err
 	}
-	PutUint(buf, CompressAmount(uint64(a.ValueSat)))
-	_, err = w.Write(buf)
+	err = PutUint(buf, CompressAmount(uint64(a.ValueSat)))
 	if err != nil {
 		return err
 	}
