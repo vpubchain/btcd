@@ -158,7 +158,7 @@ func (a *AssetType) Deserialize(r io.Reader) error {
 	if err != nil {
 		return err
 	}
-	a.MaxSupply = int64(DecompressAmount(uint64(a.MaxSupply)))
+	//a.MaxSupply = int64(DecompressAmount(uint64(a.MaxSupply)))
 
 	return nil
 }
