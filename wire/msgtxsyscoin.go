@@ -59,7 +59,7 @@ func PutUint(w io.Writer, n uint64) error {
 			mask = 0x80
 		}
 		tmpI := (n & 0x7F) | mask
-		tmp[len] = (uint8)tmpI
+		tmp[len] = uint8(tmpI)
         if n <= 0x7F {
 			break
 		}
