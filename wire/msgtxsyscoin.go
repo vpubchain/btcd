@@ -51,8 +51,8 @@ type SyscoinBurnToEthereumType struct {
 }
 
 func PutUint(w io.Writer, n uint64) error {
-    tmp := make([]uint8, (len(n)*8+6)/7)
-    var len int=0
+    tmp := make([]uint8, (8*8+6)/7)
+    var len uint8=0
     for  {
 		mask := 0x00
 		if len > 0 {
@@ -312,11 +312,11 @@ func (a *AssetAllocationType) Serialize(w io.Writer) error {
 
 func (a *AssetOutType) Serialize(w io.Writer) error {
 	var err error
-	err = PutUint(buf, uint64(a.N))
+	err = PutUint(w, uint64(a.N))
 	if err != nil {
 		return err
 	}
-	err = PutUint(buf, CompressAmount(uint64(a.ValueSat)))
+	err = PutUint(w, CompressAmount(uint64(a.ValueSat)))
 	if err != nil {
 		return err
 	}
