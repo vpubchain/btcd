@@ -55,7 +55,7 @@ func PutUint(w io.Writer, n uint64) error {
     tmp := make([]uint8, (len(n)*8+6)/7)
     var len int=0
     for  {
-        tmp[len] = (n & 0x7F) | (len ? 0x80 : 0x00)
+        tmp[len] = (n & 0x7F) | (len >= 0 ? 0x80 : 0x00)
         if (n <= 0x7F) {
 			break
 		}
