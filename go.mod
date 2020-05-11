@@ -14,4 +14,5 @@ require (
 	github.com/jrick/logrotate v1.0.0
 	github.com/kkdai/bstream v0.0.0-20161212061736-f391b8402d23
 	golang.org/x/crypto v0.0.0-20170930174604-9419663f5a44
+	github.com/bsm/go-vlq v0.0.0-20150828105119-ec6e8d4f5f4e
 )
