@@ -6,7 +6,6 @@ package wire
 
 import (
 	"io"
-	"errors"
 )
 
 type AssetOutType struct {
@@ -60,18 +59,19 @@ func PutUint(w io.Writer, n uint64) error {
 			mask = 0x80
 		}
         tmp[len] = (n & 0x7F) | mask
-        if (n <= 0x7F) {
+        if n <= 0x7F {
 			break
 		}
         n = (n >> 7) - 1
         len++
 	}
 	for n = len; n >= 0; n-- {
-		err = binarySerializer.PutUint8(w, tmp[len])
+		err := binarySerializer.PutUint8(w, tmp[len])
 		if err != nil {
 			return err
 		}
 	}
+	return nil
 }
 
 func ReadUint(r io.Reader) (uint64, error) {
@@ -81,8 +81,8 @@ func ReadUint(r io.Reader) (uint64, error) {
 		if err != nil {
 			return 0, err
 		}
-        n = (n << 7) | (chData & 0x7F)
-        if (chData & 0x80) {
+        n = (n << 7) | (uint64(chData) & 0x7F)
+        if (chData & 0x80) > 0 {
             n++
         } else {
             return n, nil
