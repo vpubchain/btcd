@@ -6,7 +6,7 @@ package wire
 
 import (
 	"io"
-	vlq "github.com/bsm/go-vlq"
+	"errors"
 )
 
 type AssetOutType struct {
@@ -50,7 +50,44 @@ type SyscoinBurnToEthereumType struct {
 	Allocation AssetAllocationType
 	EthAddress []byte
 }
+var overflow = errors.New("vlq: number overflows a 64-bit integer")
 
+// PutUint encodes a uint64 into buf and returns the number of bytes written.
+// If the buffer is too small, PutUint will panic.
+func PutUint(buf []byte, x uint64) int {
+	var n uint
+	for n = 9; n > 0; n-- {
+		if x >= 1<<(n*7) {
+			break
+		}
+	}
+
+	i := int(n) + 1
+	buf[n] = byte(x) & 0x7F
+	for n > 0 {
+		n--
+		x >>= 7
+		buf[n] = byte(x) | 0x80
+	}
+	return i
+}
+// ReadUint reads an encoded unsigned integer from r and returns it as a uint64.
+func ReadUint(r io.Reader) (uint64, error) {
+	var x uint64
+	for i := 0; ; i++ {
+		b, err := binarySerializer.Uint8(r)
+		if err != nil {
+			return x, err
+		}
+		x = (x << 7) | uint64(b&0x7f)
+
+		if b < 0x80 {
+			return x, nil
+		} else if i == 9 {
+			return 0, overflow
+		}
+	}
+}
 // Amount compression:
 // * If the amount is 0, output 0
 // * first, divide the amount (in base units) by the largest power of 10 possible; call the exponent e (e is max 9)
@@ -141,19 +178,19 @@ func (a *AssetType) Deserialize(r io.Reader) error {
 	if err != nil {
 		return err
 	}
-	valueSat, err := vlq.ReadUint(r)
+	valueSat, err := ReadUint(r)
 	if err != nil {
 		return err
 	}
 	a.Balance = int64(DecompressAmount(valueSat))
 
-	valueSat, err = vlq.ReadUint(r)
+	valueSat, err = ReadUint(r)
 	if err != nil {
 		return err
 	}
 	a.TotalSupply = int64(DecompressAmount(valueSat))
 	
-	valueSat, err = vlq.ReadUint(r)
+	valueSat, err = ReadUint(r)
 	if err != nil {
 		return err
 	}
@@ -201,17 +238,17 @@ func (a *AssetType) Serialize(w io.Writer) error {
 		return err
 	}
 	buf := make([]byte, 8)
-	vlq.PutUint(buf, CompressAmount(uint64(a.Balance)))
+	PutUint(buf, CompressAmount(uint64(a.Balance)))
 	_, err = w.Write(buf)
 	if err != nil {
 		return err
 	}
-	vlq.PutUint(buf, CompressAmount(uint64(a.TotalSupply)))
+	PutUint(buf, CompressAmount(uint64(a.TotalSupply)))
 	_, err = w.Write(buf)
 	if err != nil {
 		return err
 	}
-	vlq.PutUint(buf, CompressAmount(uint64(a.MaxSupply)))
+	PutUint(buf, CompressAmount(uint64(a.MaxSupply)))
 	_, err = w.Write(buf)
 	if err != nil {
 		return err
@@ -278,12 +315,12 @@ func (a *AssetAllocationType) Serialize(w io.Writer) error {
 func (a *AssetOutType) Serialize(w io.Writer) error {
 	var err error
 	buf := make([]byte, 8)
-	vlq.PutUint(buf, uint64(a.N))
+	PutUint(buf, uint64(a.N))
 	_, err = w.Write(buf)
 	if err != nil {
 		return err
 	}
-	vlq.PutUint(buf, CompressAmount(uint64(a.ValueSat)))
+	PutUint(buf, CompressAmount(uint64(a.ValueSat)))
 	_, err = w.Write(buf)
 	if err != nil {
 		return err
@@ -293,12 +330,12 @@ func (a *AssetOutType) Serialize(w io.Writer) error {
 
 func (a *AssetOutType) Deserialize(r io.Reader) error {
 	var err error
-	n, err := vlq.ReadUint(r)
+	n, err := ReadUint(r)
 	if err != nil {
 		return err
 	}
 	a.N = uint32(n)
-	valueSat, err := vlq.ReadUint(r)
+	valueSat, err := ReadUint(r)
 	if err != nil {
 		return err
 	}
