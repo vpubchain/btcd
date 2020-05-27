@@ -51,7 +51,7 @@ type SyscoinBurnToEthereumType struct {
 }
 
 func PutUint(w io.Writer, n uint64) error {
-    tmp := make([]uint8, (8*8+6)/7)
+    tmp := make([]uint8, 10)
     var len uint8=0
     for  {
 		var mask uint64
@@ -192,12 +192,6 @@ func (a *AssetType) Deserialize(r io.Reader) error {
 	if err != nil {
 		return err
 	}
-	a.TotalSupply = int64(DecompressAmount(valueSat))
-	
-	valueSat, err = ReadUint(r)
-	if err != nil {
-		return err
-	}
 	a.MaxSupply = int64(DecompressAmount(valueSat))
 
 	return nil
@@ -242,10 +236,6 @@ func (a *AssetType) Serialize(w io.Writer) error {
 		return err
 	}
 	err = PutUint(w, CompressAmount(uint64(a.Balance)))
-	if err != nil {
-		return err
-	}
-	err = PutUint(w, CompressAmount(uint64(a.TotalSupply)))
 	if err != nil {
 		return err
 	}
