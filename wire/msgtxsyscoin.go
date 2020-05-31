@@ -10,7 +10,7 @@ import (
 
 type AssetOutType struct {
 	N uint32
-	ValueSat int64
+	ValueSat uint64
 }
 type AssetAllocationType struct {
 	VoutAssets map[uint32][]AssetOutType
@@ -23,9 +23,9 @@ type AssetType struct {
 	Symbol string
 	PubData []byte
 	PrevPubData []byte
-	Balance int64
-	TotalSupply int64
-	MaxSupply int64
+	Balance uint64
+	TotalSupply uint64
+	MaxSupply uint64
 	Precision uint8
 	UpdateFlags uint8
 	PrevUpdateFlags uint8
@@ -186,13 +186,13 @@ func (a *AssetType) Deserialize(r io.Reader) error {
 	if err != nil {
 		return err
 	}
-	a.Balance = int64(DecompressAmount(valueSat))
+	a.Balance = DecompressAmount(valueSat)
 
 	valueSat, err = ReadUint(r)
 	if err != nil {
 		return err
 	}
-	a.MaxSupply = int64(DecompressAmount(valueSat))
+	a.MaxSupply = DecompressAmount(valueSat)
 
 	return nil
 }
@@ -235,11 +235,11 @@ func (a *AssetType) Serialize(w io.Writer) error {
 	if err != nil {
 		return err
 	}
-	err = PutUint(w, CompressAmount(uint64(a.Balance)))
+	err = PutUint(w, CompressAmount(a.Balance))
 	if err != nil {
 		return err
 	}
-	err = PutUint(w, CompressAmount(uint64(a.MaxSupply)))
+	err = PutUint(w, CompressAmount(a.MaxSupply))
 	if err != nil {
 		return err
 	}
@@ -308,7 +308,7 @@ func (a *AssetOutType) Serialize(w io.Writer) error {
 	if err != nil {
 		return err
 	}
-	err = PutUint(w, CompressAmount(uint64(a.ValueSat)))
+	err = PutUint(w, CompressAmount(a.ValueSat))
 	if err != nil {
 		return err
 	}
@@ -326,7 +326,7 @@ func (a *AssetOutType) Deserialize(r io.Reader) error {
 	if err != nil {
 		return err
 	}
-	a.ValueSat = int64(DecompressAmount(valueSat))
+	a.ValueSat = DecompressAmount(valueSat)
 	return nil
 }
 
