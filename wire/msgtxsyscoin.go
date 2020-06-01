@@ -192,6 +192,12 @@ func (a *AssetType) Deserialize(r io.Reader) error {
 	if err != nil {
 		return err
 	}
+	a.TotalSupply = DecompressAmount(valueSat)
+	
+	valueSat, err = ReadUint(r)
+	if err != nil {
+		return err
+	}
 	a.MaxSupply = DecompressAmount(valueSat)
 
 	return nil
@@ -236,6 +242,10 @@ func (a *AssetType) Serialize(w io.Writer) error {
 		return err
 	}
 	err = PutUint(w, CompressAmount(a.Balance))
+	if err != nil {
+		return err
+	}
+	err = PutUint(w, CompressAmount(a.TotalSupply))
 	if err != nil {
 		return err
 	}
