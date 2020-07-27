@@ -314,7 +314,7 @@ func (a *AssetAllocationType) Serialize(w io.Writer) error {
 
 func (a *AssetOutType) Serialize(w io.Writer) error {
 	var err error
-	err = PutUint(w, uint64(a.N))
+	err = WriteVarInt(w, 0, uint64(a.N))
 	if err != nil {
 		return err
 	}
@@ -327,7 +327,7 @@ func (a *AssetOutType) Serialize(w io.Writer) error {
 
 func (a *AssetOutType) Deserialize(r io.Reader) error {
 	var err error
-	n, err := ReadUint(r)
+	n, err := ReadVarInt(r, 0)
 	if err != nil {
 		return err
 	}
@@ -348,13 +348,11 @@ func (a *MintSyscoinType) Deserialize(r io.Reader) error {
 	if err != nil {
 		return err
 	}
-	bridgeTransferId, err := ReadVarInt(r, 0)
-	a.BridgeTransferId = uint32(bridgeTransferId)
+	err = readElement(r, &a.BridgeTransferId)
 	if err != nil {
 		return err
 	}
-	blockNumber, err := ReadVarInt(r, 0)
-	a.BlockNumber = uint32(blockNumber)
+	err = readElement(r, &a.BlockNumber)
 	if err != nil {
 		return err
 	}
@@ -399,11 +397,11 @@ func (a *MintSyscoinType) Serialize(w io.Writer) error {
 	if err != nil {
 		return err
 	}
-	err = WriteVarInt(w, 0, uint64(a.BridgeTransferId))
+	err = writeElement(w, a.BridgeTransferId)
 	if err != nil {
 		return err
 	}
-	err = WriteVarInt(w, 0, uint64(a.BlockNumber))
+	err = writeElement(w, a.BlockNumber)
 	if err != nil {
 		return err
 	}
