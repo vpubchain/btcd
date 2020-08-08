@@ -8,12 +8,17 @@ import (
 	"io"
 )
 
-type AssetOutType struct {
+type AssetOutValueType struct {
 	N uint32
 	ValueSat int64
 }
+type AssetOutType struct {
+	AssetGuid uint32
+	Values []AssetOutValueType
+	NotarySig []byte
+}
 type AssetAllocationType struct {
-	VoutAssets map[uint32][]AssetOutType
+	VoutAssets []AssetOutType
 }
 
 type AssetType struct {
@@ -23,6 +28,8 @@ type AssetType struct {
 	Symbol string
 	PubData []byte
 	PrevPubData []byte
+	NotaryKeyID []byte
+	PrevNotaryKeyID []byte
 	Balance int64
 	TotalSupply int64
 	MaxSupply int64
@@ -170,6 +177,14 @@ func (a *AssetType) Deserialize(r io.Reader) error {
 	if err != nil {
 		return err
 	}
+	a.NotaryKeyID, err = ReadVarBytes(r, 0, 20, "NotaryKeyID")
+	if err != nil {
+		return err
+	}
+	a.PrevNotaryKeyID, err = ReadVarBytes(r, 0, 20, "PrevNotaryKeyID")
+	if err != nil {
+		return err
+	}
 	a.PrevContract, err = ReadVarBytes(r, 0, 20, "PrevContract")
 	if err != nil {
 		return err
@@ -228,6 +243,14 @@ func (a *AssetType) Serialize(w io.Writer) error {
 	if err != nil {
 		return err
 	}
+	err = WriteVarBytes(w, 0, a.NotaryKeyID)
+	if err != nil {
+		return err
+	}
+	err = WriteVarBytes(w, 0, a.PrevNotaryKeyID)
+	if err != nil {
+		return err
+	}
 	err = WriteVarBytes(w, 0, a.PrevContract)
 	if err != nil {
 		return err
@@ -261,57 +284,32 @@ func (a *AssetAllocationType) Deserialize(r io.Reader) error {
 	if err != nil {
 		return err
 	}
-	a.VoutAssets = make(map[uint32][]AssetOutType, numAssets)
+	a.VoutAssets = make([]AssetOutType, numAssets)
 	for i := 0; i < int(numAssets); i++ {
-		var assetGuid uint32
-		err = readElement(r, &assetGuid)
+		err = a.VoutAssets[i].Deserialize(r)
 		if err != nil {
 			return err
-		}
-		numOutputs, err := ReadVarInt(r, 0)
-		if err != nil {
-			return err
-		}
-		assetOutArray, ok := a.VoutAssets[assetGuid]
-		if !ok {
-			assetOutArray = make([]AssetOutType, numOutputs)
-			a.VoutAssets[assetGuid] = assetOutArray
-		}
-		for j := 0; j < int(numOutputs); j++ {
-			err = assetOutArray[j].Deserialize(r)
-			if err != nil {
-				return err
-			}
 		}
 	}
 	return nil
 }
 
 func (a *AssetAllocationType) Serialize(w io.Writer) error {
-	err := WriteVarInt(w, 0, uint64(len(a.VoutAssets)))
+	lenAssets := len(a.VoutAssets)
+	err := WriteVarInt(w, 0, uint64(lenAssets))
 	if err != nil {
 		return err
 	}
-	for k, v := range a.VoutAssets {
-		err = writeElement(w, k)
+	for i := 0; i < lenAssets; i++ {
+		err = a.VoutAssets[i].Serialize(w)
 		if err != nil {
 			return err
-		}
-		err = WriteVarInt(w, 0, uint64(len(v)))
-		if err != nil {
-			return err
-		}
-		for _,voutAsset := range v {
-			err = voutAsset.Serialize(w)
-			if err != nil {
-				return err
-			}
 		}
 	}
 	return nil
 }
 
-func (a *AssetOutType) Serialize(w io.Writer) error {
+func (a *AssetOutValueType) Serialize(w io.Writer) error {
 	var err error
 	err = WriteVarInt(w, 0, uint64(a.N))
 	if err != nil {
@@ -324,7 +322,7 @@ func (a *AssetOutType) Serialize(w io.Writer) error {
 	return nil
 }
 
-func (a *AssetOutType) Deserialize(r io.Reader) error {
+func (a *AssetOutValueType) Deserialize(r io.Reader) error {
 	var err error
 	n, err := ReadVarInt(r, 0)
 	if err != nil {
@@ -339,6 +337,53 @@ func (a *AssetOutType) Deserialize(r io.Reader) error {
 	return nil
 }
 
+func (a *AssetOutType) Serialize(w io.Writer) error {
+	var err error
+	err := writeElement(w, a.AssetGuid)
+	if err != nil {
+		return err
+	}
+	lenValues := len(a.Values)
+	err = WriteVarInt(w, 0, uint64(lenValues))
+	if err != nil {
+		return err
+	}
+	for i := 0; i < lenValues; i++ {
+		err = a.Values[i].Serialize(w)
+		if err != nil {
+			return err
+		}
+	}
+	err = WriteVarBytes(w, 0, a.NotarySig)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (a *AssetOutType) Deserialize(r io.Reader) error {
+	var err error
+	err := readElement(r, &a.AssetGuid)
+	if err != nil {
+		return err
+	}
+	numOutputs, err := ReadVarInt(r, 0)
+	if err != nil {
+		return err
+	}
+	a.Values = make([]AssetOutValueType, numOutputs)
+	for i := 0; i < int(numOutputs); i++ {
+		err = a.Values[i].Deserialize(r)
+		if err != nil {
+			return err
+		}
+	}
+	a.NotarySig, err = ReadVarBytes(r, 0, 65, "NotarySig")
+	if err != nil {
+		return err
+	}
+	return nil
+}
 
 
 func (a *MintSyscoinType) Deserialize(r io.Reader) error {
