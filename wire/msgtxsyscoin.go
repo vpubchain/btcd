@@ -154,8 +154,7 @@ func DecompressAmount(x uint64) uint64 {
 
 
 func (a *AssetType) Deserialize(r io.Reader) error {
-	var err error
-	err = a.Allocation.Deserialize(r)
+	err := a.Allocation.Deserialize(r)
 	if err != nil {
 		return err
 	}
@@ -218,8 +217,7 @@ func (a *AssetType) Deserialize(r io.Reader) error {
 }
 
 func (a *AssetType) Serialize(w io.Writer) error {
-	var err error
-	err = a.Allocation.Serialize(w)
+	err := a.Allocation.Serialize(w)
 	if err != nil {
 		return err
 	}
@@ -310,8 +308,7 @@ func (a *AssetAllocationType) Serialize(w io.Writer) error {
 }
 
 func (a *AssetOutValueType) Serialize(w io.Writer) error {
-	var err error
-	err = WriteVarInt(w, 0, uint64(a.N))
+	err := WriteVarInt(w, 0, uint64(a.N))
 	if err != nil {
 		return err
 	}
@@ -323,7 +320,6 @@ func (a *AssetOutValueType) Serialize(w io.Writer) error {
 }
 
 func (a *AssetOutValueType) Deserialize(r io.Reader) error {
-	var err error
 	n, err := ReadVarInt(r, 0)
 	if err != nil {
 		return err
@@ -338,7 +334,6 @@ func (a *AssetOutValueType) Deserialize(r io.Reader) error {
 }
 
 func (a *AssetOutType) Serialize(w io.Writer) error {
-	var err error
 	err := writeElement(w, a.AssetGuid)
 	if err != nil {
 		return err
@@ -362,7 +357,6 @@ func (a *AssetOutType) Serialize(w io.Writer) error {
 }
 
 func (a *AssetOutType) Deserialize(r io.Reader) error {
-	var err error
 	err := readElement(r, &a.AssetGuid)
 	if err != nil {
 		return err
@@ -387,8 +381,7 @@ func (a *AssetOutType) Deserialize(r io.Reader) error {
 
 
 func (a *MintSyscoinType) Deserialize(r io.Reader) error {
-	var err error
-	err = a.Allocation.Deserialize(r)
+	err := a.Allocation.Deserialize(r)
 	if err != nil {
 		return err
 	}
@@ -436,8 +429,7 @@ func (a *MintSyscoinType) Deserialize(r io.Reader) error {
 }
 
 func (a *MintSyscoinType) Serialize(w io.Writer) error {
-	var err error
-	err = a.Allocation.Serialize(w)
+	err := a.Allocation.Serialize(w)
 	if err != nil {
 		return err
 	}
@@ -485,8 +477,7 @@ func (a *MintSyscoinType) Serialize(w io.Writer) error {
 }
 
 func (a *SyscoinBurnToEthereumType) Deserialize(r io.Reader) error {
-	var err error
-	err = a.Allocation.Deserialize(r)
+	err := a.Allocation.Deserialize(r)
 	if err != nil {
 		return err
 	}
@@ -498,8 +489,7 @@ func (a *SyscoinBurnToEthereumType) Deserialize(r io.Reader) error {
 }
 
 func (a *SyscoinBurnToEthereumType) Serialize(w io.Writer) error {
-	var err error
-	err = a.Allocation.Serialize(w)
+	err := a.Allocation.Serialize(w)
 	if err != nil {
 		return err
 	}
