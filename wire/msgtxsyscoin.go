@@ -237,12 +237,13 @@ func (a *AssetType) Deserialize(r io.Reader) error {
 		return err
 	}
 	a.Precision, err = binarySerializer.Uint8(r)
+	var symbol []byte
 	symbol, err = ReadVarBytes(r, 0, MAX_SYMBOL_SIZE, "Symbol")
 	if err != nil {
 		return err
 	}
 	base64Text := make([]byte, base64.StdEncoding.DecodedLen(len(symbol)))
-	n, err := base64.StdEncoding.Decode(base64Text, []byte(symbol))
+	n, err := base64.StdEncoding.Decode(base64Text, symbol)
 	if err != nil {
 		return err
 	}
