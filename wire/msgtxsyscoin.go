@@ -69,8 +69,8 @@ type AssetType struct {
 	TotalSupply int64
 	MaxSupply int64
 	Precision uint8
-	UpdateCapabilitiesFlags uint8
-	PrevUpdateCapabilitiesFlags uint8
+	UpdateCapabilityFlags uint8
+	PrevUpdateCapabilityFlags uint8
 	UpdateFlags uint8
 }
 
@@ -189,7 +189,7 @@ func DecompressAmount(x uint64) uint64 {
 }
 
 func (a *NotaryDetailsType) Deserialize(r io.Reader) error {
-	a.EndPoint, err := ReadVarBytes(r, 0, MAX_VALUE_LENGTH, "EndPoint")
+	a.EndPoint, err = ReadVarBytes(r, 0, MAX_VALUE_LENGTH, "EndPoint")
 	if err != nil {
 		return err
 	}
@@ -201,6 +201,7 @@ func (a *NotaryDetailsType) Deserialize(r io.Reader) error {
 	if err != nil {
 		return err
 	}
+	return nil
 }
 func (a *AuxFeesType) Deserialize(r io.Reader) error {
 	valueSat, err := ReadUint(r)
@@ -212,6 +213,7 @@ func (a *AuxFeesType) Deserialize(r io.Reader) error {
 	if err != nil {
 		return err
 	}
+	return nul
 }
 func (a *AuxFeeDetailsType) Deserialize(r io.Reader) error {
 	numAuxFees, err := ReadVarInt(r, 0)
@@ -219,12 +221,13 @@ func (a *AuxFeeDetailsType) Deserialize(r io.Reader) error {
 		return err
 	}
 	a.AuxFees = make([]AuxFeesType, numAuxFees)
-	for i := 0; i < int(numAssets); i++ {
+	for i := 0; i < int(numAuxFees); i++ {
 		err = a.AuxFees[i].Deserialize(r)
 		if err != nil {
 			return err
 		}
 	}
+	return nil
 }
 func (a *AssetType) Deserialize(r io.Reader) error {
 	err := a.Allocation.Deserialize(r)
@@ -347,6 +350,7 @@ func (a *NotaryDetailsType) Serialize(w io.Writer) error {
 	if err != nil {
 		return err
 	}
+	return nil
 }
 func (a *AuxFeesType) Serialize(w io.Writer) error {
 	err := PutUint(w, CompressAmount(uint64(a.Bound)))
@@ -357,6 +361,7 @@ func (a *AuxFeesType) Serialize(w io.Writer) error {
 	if err != nil {
 		return err
 	}
+	return nil
 }
 func (a *AuxFeeDetailsType) Serialize(w io.Writer) error {
 	lenAuxFees := len(a.AuxFees)
@@ -370,6 +375,7 @@ func (a *AuxFeeDetailsType) Serialize(w io.Writer) error {
 			return err
 		}
 	}
+	return nil
 }
 
 func (a *AssetType) Serialize(w io.Writer) error {
