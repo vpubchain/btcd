@@ -7,6 +7,7 @@ package wire
 import (
 	"io"
 	"encoding/binary"
+	"encoding/base64"
 )
 const (
 	MAX_GUID_LENGTH = 20
@@ -53,8 +54,8 @@ type AuxFeeDetailsType struct {
 type AssetType struct {
 	Allocation AssetAllocationType
 	Contract []byte
-	PrevContract  []byte
-	Symbol []byte
+	PrevContract []byte
+	Symbol string
 	PubData []byte
 	PrevPubData []byte
 	NotaryKeyID []byte
@@ -236,10 +237,16 @@ func (a *AssetType) Deserialize(r io.Reader) error {
 		return err
 	}
 	a.Precision, err = binarySerializer.Uint8(r)
-	a.Symbol, err = ReadVarBytes(r, 0, MAX_SYMBOL_SIZE, "Symbol")
+	symbol, err = ReadVarBytes(r, 0, MAX_SYMBOL_SIZE, "Symbol")
 	if err != nil {
 		return err
 	}
+	base64Text := make([]byte, base64.StdEncoding.DecodedLen(len(symbol)))
+	n, err := base64.StdEncoding.Decode(base64Text, []byte(symbol))
+	if err != nil {
+		return err
+	}
+	a.Symbol = string(base64Text[:n])
 	a.UpdateFlags, err = binarySerializer.Uint8(r)
 	if err != nil {
 		return err
@@ -388,7 +395,9 @@ func (a *AssetType) Serialize(w io.Writer) error {
 	if err != nil {
 		return err
 	}
-	err = WriteVarBytes(w, 0, a.Symbol)
+	base64Text := make([]byte, base64.StdEncoding.EncodedLen(len(a.Symbol)))
+	base64.StdEncoding.Encode(base64Text, []byte(a.Symbol))
+	err = WriteVarBytes(w, 0, base64Text)
 	if err != nil {
 		return err
 	}
