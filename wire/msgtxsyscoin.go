@@ -190,12 +190,12 @@ func DecompressAmount(x uint64) uint64 {
 }
 
 func (a *NotaryDetailsType) Deserialize(r io.Reader) error {
-	endpoint, err := ReadVarBytes(r, 0, MAX_VALUE_LENGTH, "EndPoint")
+	endpoint, err = ReadVarBytes(r, 0, MAX_VALUE_LENGTH, "EndPoint")
 	if err != nil {
 		return err
 	}
 	base64Text := make([]byte, base64.StdEncoding.DecodedLen(len(endpoint)))
-	n, err := base64.StdEncoding.Decode(base64Text, endpoint)
+	n, err := base64.StdEncoding.Decode(base64Text, []byte(endpoint))
 	if err != nil {
 		return err
 	}
@@ -243,13 +243,13 @@ func (a *AssetType) Deserialize(r io.Reader) error {
 		return err
 	}
 	a.Precision, err = binarySerializer.Uint8(r)
-	var symbol []byte
+	var symbol string
 	symbol, err = ReadVarBytes(r, 0, MAX_SYMBOL_SIZE, "Symbol")
 	if err != nil {
 		return err
 	}
 	base64Text := make([]byte, base64.StdEncoding.DecodedLen(len(symbol)))
-	n, err := base64.StdEncoding.Decode(base64Text, symbol)
+	n, err := base64.StdEncoding.Decode(base64Text, []byte(symbol))
 	if err != nil {
 		return err
 	}
@@ -270,13 +270,13 @@ func (a *AssetType) Deserialize(r io.Reader) error {
 		}
 	}
 	if (a.UpdateFlags & ASSET_UPDATE_DATA) != 0 {
-		var pubdata []byte
+		var pubdata string
 		pubdata, err = ReadVarBytes(r, 0, MAX_VALUE_LENGTH, "PubData")
 		if err != nil {
 			return err
 		}
 		base64Text := make([]byte, base64.StdEncoding.DecodedLen(len(pubdata)))
-		n, err := base64.StdEncoding.Decode(base64Text, pubdata)
+		n, err := base64.StdEncoding.Decode(base64Text, []byte(pubdata))
 		if err != nil {
 			return err
 		}
@@ -287,7 +287,7 @@ func (a *AssetType) Deserialize(r io.Reader) error {
 			return err
 		}
 		base64Text = make([]byte, base64.StdEncoding.DecodedLen(len(pubdata)))
-		n, err = base64.StdEncoding.Decode(base64Text, pubdata)
+		n, err = base64.StdEncoding.Decode(base64Text, []byte(pubdata))
 		if err != nil {
 			return err
 		}
