@@ -7,7 +7,6 @@ package wire
 import (
 	"io"
 	"encoding/binary"
-	"encoding/base64"
 )
 const (
 	MAX_GUID_LENGTH = 20
@@ -40,7 +39,7 @@ type AssetAllocationType struct {
 	VoutAssets []AssetOutType
 }
 type NotaryDetailsType struct {
-	EndPoint string
+	EndPoint []byte
 	InstantTransfers uint8
 	HDRequired uint8
 }
@@ -55,9 +54,9 @@ type AssetType struct {
 	Allocation AssetAllocationType
 	Contract []byte
 	PrevContract  []byte
-	Symbol string
-	PubData string
-	PrevPubData string
+	Symbol []byte
+	PubData []byte
+	PrevPubData []byte
 	NotaryKeyID []byte
 	PrevNotaryKeyID []byte
 	NotaryDetails NotaryDetailsType
@@ -190,13 +189,11 @@ func DecompressAmount(x uint64) uint64 {
 }
 
 func (a *NotaryDetailsType) Deserialize(r io.Reader) error {
-	base64Text := make([]byte, base64.StdEncoding.DecodedLen(len(endpoint)))
-	n, err := base64.StdEncoding.Decode(base64Text, []byte(endpoint))
+	var err error
+	a.EndPoint, err = ReadVarBytes(r, 0, MAX_VALUE_LENGTH, "EndPoint")
 	if err != nil {
 		return err
 	}
-	a.EndPoint = string(base64Text[:n])
-
 	a.InstantTransfers, err = binarySerializer.Uint8(r)
 	if err != nil {
 		return err
@@ -239,17 +236,10 @@ func (a *AssetType) Deserialize(r io.Reader) error {
 		return err
 	}
 	a.Precision, err = binarySerializer.Uint8(r)
-	symbol, err = ReadVarBytes(r, 0, MAX_SYMBOL_SIZE, "Symbol")
+	a.Symbol, err = ReadVarBytes(r, 0, MAX_SYMBOL_SIZE, "Symbol")
 	if err != nil {
 		return err
 	}
-	base64Text := make([]byte, base64.StdEncoding.DecodedLen(len(symbol)))
-	n, err := base64.StdEncoding.Decode(base64Text, []byte(symbol))
-	if err != nil {
-		return err
-	}
-	a.Symbol = string(base64Text[:n])
-
 	a.UpdateFlags, err = binarySerializer.Uint8(r)
 	if err != nil {
 		return err
@@ -265,27 +255,14 @@ func (a *AssetType) Deserialize(r io.Reader) error {
 		}
 	}
 	if (a.UpdateFlags & ASSET_UPDATE_DATA) != 0 {
-		pubdata, err = ReadVarBytes(r, 0, MAX_VALUE_LENGTH, "PubData")
+		a.PubData, err = ReadVarBytes(r, 0, MAX_VALUE_LENGTH, "PubData")
 		if err != nil {
 			return err
 		}
-		base64Text := make([]byte, base64.StdEncoding.DecodedLen(len(pubdata)))
-		n, err := base64.StdEncoding.Decode(base64Text, []byte(pubdata))
+		a.PrevPubData, err = ReadVarBytes(r, 0, MAX_VALUE_LENGTH, "PrevPubData")
 		if err != nil {
 			return err
 		}
-		a.PubData = string(base64Text[:n])
-
-		pubdata, err = ReadVarBytes(r, 0, MAX_VALUE_LENGTH, "PrevPubData")
-		if err != nil {
-			return err
-		}
-		base64Text = make([]byte, base64.StdEncoding.DecodedLen(len(pubdata)))
-		n, err = base64.StdEncoding.Decode(base64Text, []byte(pubdata))
-		if err != nil {
-			return err
-		}
-		a.PrevPubData = string(base64Text[:n])
 	}
 	if (a.UpdateFlags & ASSET_UPDATE_SUPPLY) != 0 {
 		valueSat, err := ReadUint(r)
@@ -362,9 +339,7 @@ func (a *AssetType) Deserialize(r io.Reader) error {
 
 
 func (a *NotaryDetailsType) Serialize(w io.Writer) error {
-	base64Text := make([]byte, base64.StdEncoding.EncodedLen(len(a.EndPoint)))
-    base64.StdEncoding.Encode(base64Text, []byte(a.EndPoint))
-	err := WriteVarBytes(w, 0, base64Text)
+	err := WriteVarBytes(w, 0, a.EndPoint)
 	if err != nil {
 		return err
 	}
@@ -413,9 +388,7 @@ func (a *AssetType) Serialize(w io.Writer) error {
 	if err != nil {
 		return err
 	}
-	base64Text := make([]byte, base64.StdEncoding.EncodedLen(len(a.Symbol)))
-    base64.StdEncoding.Encode(base64Text, []byte(a.Symbol))
-	err = WriteVarBytes(w, 0, base64Text)
+	err = WriteVarBytes(w, 0, a.Symbol)
 	if err != nil {
 		return err
 	}
@@ -434,15 +407,11 @@ func (a *AssetType) Serialize(w io.Writer) error {
 		}
 	}
 	if (a.UpdateFlags & ASSET_UPDATE_DATA) != 0 {
-		base64Text = make([]byte, base64.StdEncoding.EncodedLen(len(a.PubData)))
-		base64.StdEncoding.Encode(base64Text, []byte(a.PubData))
-		err = WriteVarBytes(w, 0, base64Text)
+		err = WriteVarBytes(w, 0, a.PubData)
 		if err != nil {
 			return err
 		}
-		base64Text = make([]byte, base64.StdEncoding.EncodedLen(len(a.PrevPubData)))
-		base64.StdEncoding.Encode(base64Text, []byte(a.PrevPubData))
-		err = WriteVarBytes(w, 0, base64Text)
+		err = WriteVarBytes(w, 0, a.PrevPubData)
 		if err != nil {
 			return err
 		}
