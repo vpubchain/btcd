@@ -16,14 +16,14 @@ const (
 	MAX_RLP_SIZE = 4096
 )
 const ( 	
-	ASSET_UPDATE_DATA = 1, // can you update public data field?
-  	ASSET_UPDATE_CONTRACT = 2, // can you update smart contract?
- 	ASSET_UPDATE_SUPPLY = 4, // can you update supply?
- 	ASSET_UPDATE_NOTARY_KEY = 8, // can you update notary?
- 	ASSET_UPDATE_NOTARY_DETAILS =, 16 // can you update notary details?
- 	ASSET_UPDATE_AUXFEE_KEY = 32, // can you update aux fees?
-	ASSET_UPDATE_AUXFEE_DETAILS = 64, // can you update aux fees details?
- 	ASSET_UPDATE_CAPABILITYFLAGS = 128, // can you update capability flags?
+	ASSET_UPDATE_DATA = 1 // can you update public data field?
+  	ASSET_UPDATE_CONTRACT = 2 // can you update smart contract?
+ 	ASSET_UPDATE_SUPPLY = 4 // can you update supply?
+ 	ASSET_UPDATE_NOTARY_KEY = 8 // can you update notary?
+ 	ASSET_UPDATE_NOTARY_DETAILS = 16 // can you update notary details?
+ 	ASSET_UPDATE_AUXFEE_KEY = 32 // can you update aux fees?
+	ASSET_UPDATE_AUXFEE_DETAILS = 64 // can you update aux fees details?
+ 	ASSET_UPDATE_CAPABILITYFLAGS = 128 // can you update capability flags?
  	ASSET_UPDATE_ALL = 255
 )
 type AssetOutValueType struct {
