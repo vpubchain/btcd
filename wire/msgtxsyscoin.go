@@ -8,11 +8,11 @@ import (
 	"io"
 	"encoding/binary"
 )
-const int MAX_GUID_LENGTH = 20
-const int MAX_VALUE_LENGTH = 512
-const int MAX_SYMBOL_SIZE = 12 // up to 9 characters base64 decoded
-const int MAX_SIG_SIZE = 65
-const int MAX_RLP_SIZE = 4096
+const uint32 MAX_GUID_LENGTH = 20
+const uint32 MAX_VALUE_LENGTH = 512
+const uint32 MAX_SYMBOL_SIZE = 12 // up to 9 characters base64 decoded
+const uint32 MAX_SIG_SIZE = 65
+const uint32 MAX_RLP_SIZE = 4096
 type AssetOutValueType struct {
 	N uint32
 	ValueSat int64
