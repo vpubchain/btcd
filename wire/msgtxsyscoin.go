@@ -189,6 +189,7 @@ func DecompressAmount(x uint64) uint64 {
 }
 
 func (a *NotaryDetailsType) Deserialize(r io.Reader) error {
+	var err error
 	a.EndPoint, err = ReadVarBytes(r, 0, MAX_VALUE_LENGTH, "EndPoint")
 	if err != nil {
 		return err
@@ -213,7 +214,7 @@ func (a *AuxFeesType) Deserialize(r io.Reader) error {
 	if err != nil {
 		return err
 	}
-	return nul
+	return nil
 }
 func (a *AuxFeeDetailsType) Deserialize(r io.Reader) error {
 	numAuxFees, err := ReadVarInt(r, 0)
