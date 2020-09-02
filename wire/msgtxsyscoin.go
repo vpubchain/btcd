@@ -6,8 +6,13 @@ package wire
 
 import (
 	"io"
+	"encoding/binary"
 )
-
+const int MAX_GUID_LENGTH = 20
+const int MAX_VALUE_LENGTH = 512
+const int MAX_SYMBOL_SIZE = 12 // up to 9 characters base64 decoded
+const int MAX_SIG_SIZE = 65
+const int MAX_RLP_SIZE = 4096
 type AssetOutValueType struct {
 	N uint32
 	ValueSat int64
@@ -20,22 +25,40 @@ type AssetOutType struct {
 type AssetAllocationType struct {
 	VoutAssets []AssetOutType
 }
-
+type NotaryDetailsType struct {
+	EndPoint []byte
+	InstantTransfers uint8
+	HDRequired uint8
+}
+type AuxFeesType struct {
+	Bound int64
+	Percent uint16
+}
+type AuxFeeDetailsType struct {
+	AuxFees []AuxFeesType
+}
 type AssetType struct {
 	Allocation AssetAllocationType
 	Contract []byte
 	PrevContract  []byte
-	Symbol string
+	Symbol []byte
 	PubData []byte
 	PrevPubData []byte
 	NotaryKeyID []byte
 	PrevNotaryKeyID []byte
+	NotaryDetails NotaryDetailsType
+	PrevNotaryDetails NotaryDetailsType
+	AuxFeeKeyID []byte
+	PrevAuxFeeKeyID []byte
+	AuxFeeDetails AuxFeeDetailsType
+	PrevAuxFeeDetails AuxFeeDetailsType
 	Balance int64
 	TotalSupply int64
 	MaxSupply int64
 	Precision uint8
+	UpdateCapabilitiesFlags uint8
+	PrevUpdateCapabilitiesFlags uint8
 	UpdateFlags uint8
-	PrevUpdateFlags uint8
 }
 
 type MintSyscoinType struct {
@@ -152,68 +175,188 @@ func DecompressAmount(x uint64) uint64 {
     return n
 }
 
-
+func (a *NotaryDetailsType) Deserialize(r io.Reader) error {
+	a.EndPoint, err := ReadVarBytes(r, 0, MAX_VALUE_LENGTH, "EndPoint")
+	if err != nil {
+		return err
+	}
+	a.InstantTransfers, err = binarySerializer.Uint8(r)
+	if err != nil {
+		return err
+	}
+	a.HDRequired, err = binarySerializer.Uint8(r)
+	if err != nil {
+		return err
+	}
+}
+func (a *AuxFeesType) Deserialize(r io.Reader) error {
+	valueSat, err := ReadUint(r)
+	if err != nil {
+		return err
+	}
+	a.Bound = int64(DecompressAmount(valueSat))
+	a.Percent, err = binarySerializer.Uint16(r, binary.LittleEndian)
+	if err != nil {
+		return err
+	}
+}
+func (a *AuxFeeDetailsType) Deserialize(r io.Reader) error {
+	numAuxFees, err := ReadVarInt(r, 0)
+	if err != nil {
+		return err
+	}
+	a.AuxFees = make([]AuxFeesType, numAuxFees)
+	for i := 0; i < int(numAssets); i++ {
+		err = a.AuxFees[i].Deserialize(r)
+		if err != nil {
+			return err
+		}
+	}
+}
 func (a *AssetType) Deserialize(r io.Reader) error {
 	err := a.Allocation.Deserialize(r)
 	if err != nil {
 		return err
 	}
 	a.Precision, err = binarySerializer.Uint8(r)
-	a.Contract, err = ReadVarBytes(r, 0, 20, "Contract")
+	a.Symbol, err = ReadVarBytes(r, 0, MAX_SYMBOL_SIZE, "Symbol")
 	if err != nil {
 		return err
 	}
-	a.PubData, err = ReadVarBytes(r, 0, 512, "PubData")
-	if err != nil {
-		return err
-	}
-	symbol, err := ReadVarBytes(r, 0, 8, "Symbol")
-	if err != nil {
-		return err
-	}
-	a.Symbol = string(symbol)
 	a.UpdateFlags, err = binarySerializer.Uint8(r)
 	if err != nil {
 		return err
 	}
-	a.NotaryKeyID, err = ReadVarBytes(r, 0, 20, "NotaryKeyID")
-	if err != nil {
-		return err
+	if a.UpdateFlags & ASSET_UPDATE_CONTRACT {
+		a.Contract, err = ReadVarBytes(r, 0, MAX_GUID_LENGTH, "Contract")
+		if err != nil {
+			return err
+		}
+		a.PrevContract, err = ReadVarBytes(r, 0, MAX_GUID_LENGTH, "PrevContract")
+		if err != nil {
+			return err
+		}
 	}
-	a.PrevNotaryKeyID, err = ReadVarBytes(r, 0, 20, "PrevNotaryKeyID")
-	if err != nil {
-		return err
+	if a.UpdateFlags & ASSET_UPDATE_DATA {
+		a.PubData, err = ReadVarBytes(r, 0, MAX_VALUE_LENGTH, "PubData")
+		if err != nil {
+			return err
+		}
+		a.PrevPubData, err = ReadVarBytes(r, 0, MAX_VALUE_LENGTH, "PrevPubData")
+		if err != nil {
+			return err
+		}
 	}
-	a.PrevContract, err = ReadVarBytes(r, 0, 20, "PrevContract")
-	if err != nil {
-		return err
-	}
-	a.PrevPubData, err = ReadVarBytes(r, 0, 512, "PrevPubData")
-	if err != nil {
-		return err
-	}
-	a.PrevUpdateFlags, err = binarySerializer.Uint8(r)
-	if err != nil {
-		return err
-	}
-	valueSat, err := ReadUint(r)
-	if err != nil {
-		return err
-	}
-	a.Balance = int64(DecompressAmount(valueSat))
+	if a.UpdateFlags & ASSET_UPDATE_SUPPLY {
+		valueSat, err := ReadUint(r)
+		if err != nil {
+			return err
+		}
+		a.Balance = int64(DecompressAmount(valueSat))
 
-	valueSat, err = ReadUint(r)
-	if err != nil {
-		return err
+		valueSat, err = ReadUint(r)
+		if err != nil {
+			return err
+		}
+		a.TotalSupply = int64(DecompressAmount(valueSat))
+
+		valueSat, err = ReadUint(r)
+		if err != nil {
+			return err
+		}
+		a.MaxSupply = int64(DecompressAmount(valueSat))
 	}
-	a.TotalSupply = int64(DecompressAmount(valueSat))
-	valueSat, err = ReadUint(r)
-	if err != nil {
-		return err
+	if a.UpdateFlags & ASSET_UPDATE_NOTARY_KEY {
+		a.NotaryKeyID, err = ReadVarBytes(r, 0, MAX_GUID_LENGTH, "NotaryKeyID")
+		if err != nil {
+			return err
+		}
+		a.PrevNotaryKeyID, err = ReadVarBytes(r, 0, MAX_GUID_LENGTH, "PrevNotaryKeyID")
+		if err != nil {
+			return err
+		}
 	}
-	a.MaxSupply = int64(DecompressAmount(valueSat))
+	if a.UpdateFlags & ASSET_UPDATE_NOTARY_DETAILS {
+		err = a.NotaryDetails.Deserialize(r)
+		if err != nil {
+			return err
+		}
+		err = a.PrevNotaryDetails.Deserialize(r)
+		if err != nil {
+			return err
+		}
+	}
+	if a.UpdateFlags & ASSET_UPDATE_AUXFEE_KEY {
+		a.AuxFeeKeyID, err = ReadVarBytes(r, 0, MAX_GUID_LENGTH, "AuxFeeKeyID")
+		if err != nil {
+			return err
+		}
+		a.PrevAuxFeeKeyID, err = ReadVarBytes(r, 0, MAX_GUID_LENGTH, "PrevAuxFeeKeyID")
+		if err != nil {
+			return err
+		}
+	}
+	if a.UpdateFlags & ASSET_UPDATE_AUXFEE_DETAILS {
+		err = a.AuxFeeDetails.Deserialize(r)
+		if err != nil {
+			return err
+		}
+		err = a.PrevAuxFeeDetails.Deserialize(r)
+		if err != nil {
+			return err
+		}
+	}
+	if a.UpdateFlags & ASSET_UPDATE_CAPABILITYFLAGS {
+		a.UpdateCapabilityFlags, err = binarySerializer.Uint8(r)
+		if err != nil {
+			return err
+		}
+		a.PrevUpdateCapabilityFlags, err = binarySerializer.Uint8(r)
+		if err != nil {
+			return err
+		}
+	}
 
 	return nil
+}
+
+
+func (a *NotaryDetailsType) Serialize(w io.Writer) error {
+	err := WriteVarBytes(w, 0, a.EndPoint)
+	if err != nil {
+		return err
+	}
+	err = binarySerializer.PutUint8(w, a.InstantTransfers)
+	if err != nil {
+		return err
+	}
+	err = binarySerializer.PutUint8(w, a.HDRequired)
+	if err != nil {
+		return err
+	}
+}
+func (a *AuxFeesType) Serialize(w io.Writer) error {
+	err := PutUint(w, CompressAmount(uint64(a.Bound)))
+	if err != nil {
+		return err
+	}
+	err = binarySerializer.PutUint16(w, binary.LittleEndian, a.Percent)
+	if err != nil {
+		return err
+	}
+}
+func (a *AuxFeeDetailsType) Serialize(w io.Writer) error {
+	lenAuxFees := len(a.AuxFees)
+	err := WriteVarInt(w, 0, uint64(lenAuxFees))
+	if err != nil {
+		return err
+	}
+	for i := 0; i < lenAuxFees; i++ {
+		err = a.AuxFees[i].Serialize(w)
+		if err != nil {
+			return err
+		}
+	}
 }
 
 func (a *AssetType) Serialize(w io.Writer) error {
@@ -225,15 +368,7 @@ func (a *AssetType) Serialize(w io.Writer) error {
 	if err != nil {
 		return err
 	}
-	err = WriteVarBytes(w, 0, a.Contract)
-	if err != nil {
-		return err
-	}
-	err = WriteVarBytes(w, 0, a.PubData)
-	if err != nil {
-		return err
-	}
-	err = WriteVarBytes(w, 0, ([]byte)(a.Symbol))
+	err = WriteVarBytes(w, 0, a.Symbol)
 	if err != nil {
 		return err
 	}
@@ -241,38 +376,91 @@ func (a *AssetType) Serialize(w io.Writer) error {
 	if err != nil {
 		return err
 	}
-	err = WriteVarBytes(w, 0, a.NotaryKeyID)
-	if err != nil {
-		return err
+	if a.UpdateFlags & ASSET_UPDATE_CONTRACT {
+		err = WriteVarBytes(w, 0, a.Contract)
+		if err != nil {
+			return err
+		}
+		err = WriteVarBytes(w, 0, a.PrevContract)
+		if err != nil {
+			return err
+		}
 	}
-	err = WriteVarBytes(w, 0, a.PrevNotaryKeyID)
-	if err != nil {
-		return err
+	if a.UpdateFlags & ASSET_UPDATE_DATA {
+		err = WriteVarBytes(w, 0, a.PubData)
+		if err != nil {
+			return err
+		}
+		err = WriteVarBytes(w, 0, a.PrevPubData)
+		if err != nil {
+			return err
+		}
 	}
-	err = WriteVarBytes(w, 0, a.PrevContract)
-	if err != nil {
-		return err
+	if a.UpdateFlags & ASSET_UPDATE_SUPPLY {
+		err = PutUint(w, CompressAmount(uint64(a.Balance)))
+		if err != nil {
+			return err
+		}
+		err = PutUint(w, CompressAmount(uint64(a.TotalSupply)))
+		if err != nil {
+			return err
+		}
+		err = PutUint(w, CompressAmount(uint64(a.MaxSupply)))
+		if err != nil {
+			return err
+		}
 	}
-	err = WriteVarBytes(w, 0, a.PrevPubData)
-	if err != nil {
-		return err
+	if a.UpdateFlags & ASSET_UPDATE_NOTARY_KEY {
+		err = WriteVarBytes(w, 0, a.NotaryKeyID)
+		if err != nil {
+			return err
+		}
+		err = WriteVarBytes(w, 0, a.PrevNotaryKeyID)
+		if err != nil {
+			return err
+		}
 	}
-	err = binarySerializer.PutUint8(w, a.PrevUpdateFlags)
-	if err != nil {
-		return err
+	if a.UpdateFlags & ASSET_UPDATE_NOTARY_DETAILS {
+		err = a.NotaryDetails.Serialize(w)
+		if err != nil {
+			return err
+		}
+		err = a.PrevNotaryDetails.Serialize(w)
+		if err != nil {
+			return err
+		}
 	}
-	err = PutUint(w, CompressAmount(uint64(a.Balance)))
-	if err != nil {
-		return err
+	if a.UpdateFlags & ASSET_UPDATE_AUXFEE_KEY {
+		err = WriteVarBytes(w, 0, a.AuxFeeKeyID)
+		if err != nil {
+			return err
+		}
+		err = WriteVarBytes(w, 0, a.PrevAuxFeeKeyID)
+		if err != nil {
+			return err
+		}
 	}
-	err = PutUint(w, CompressAmount(uint64(a.TotalSupply)))
-	if err != nil {
-		return err
+	if a.UpdateFlags & ASSET_UPDATE_AUXFEE_DETAILS {
+		err = a.AuxFeeDetails.Serialize(w)
+		if err != nil {
+			return err
+		}
+		err = a.PrevAuxFeeDetails.Serialize(w)
+		if err != nil {
+			return err
+		}
 	}
-	err = PutUint(w, CompressAmount(uint64(a.MaxSupply)))
-	if err != nil {
-		return err
+	if a.UpdateFlags & ASSET_UPDATE_CAPABILITYFLAGS {
+		err = binarySerializer.PutUint8(w, a.UpdateCapabilityFlags)
+		if err != nil {
+			return err
+		}
+		err = binarySerializer.PutUint8(w, a.PrevUpdateCapabilityFlags)
+		if err != nil {
+			return err
+		}
 	}
+
 	return nil
 }
 
@@ -372,7 +560,7 @@ func (a *AssetOutType) Deserialize(r io.Reader) error {
 			return err
 		}
 	}
-	a.NotarySig, err = ReadVarBytes(r, 0, 65, "NotarySig")
+	a.NotarySig, err = ReadVarBytes(r, 0, MAX_SIG_SIZE, "NotarySig")
 	if err != nil {
 		return err
 	}
@@ -393,35 +581,35 @@ func (a *MintSyscoinType) Deserialize(r io.Reader) error {
 	if err != nil {
 		return err
 	}
-	a.TxValue, err = ReadVarBytes(r, 0, 4096, "TxValue")
+	a.TxValue, err = ReadVarBytes(r, 0, MAX_RLP_SIZE, "TxValue")
 	if err != nil {
 		return err
 	}
-	a.TxParentNodes, err = ReadVarBytes(r, 0, 4096, "TxParentNodes")
+	a.TxParentNodes, err = ReadVarBytes(r, 0, MAX_RLP_SIZE, "TxParentNodes")
 	if err != nil {
 		return err
 	}
-	a.TxRoot, err = ReadVarBytes(r, 0, 4096, "TxRoot")
+	a.TxRoot, err = ReadVarBytes(r, 0, MAX_RLP_SIZE, "TxRoot")
 	if err != nil {
 		return err
 	}
-	a.TxPath, err = ReadVarBytes(r, 0, 4096, "TxPath")
+	a.TxPath, err = ReadVarBytes(r, 0, MAX_RLP_SIZE, "TxPath")
 	if err != nil {
 		return err
 	}
-	a.ReceiptValue, err = ReadVarBytes(r, 0, 4096, "ReceiptValue")
+	a.ReceiptValue, err = ReadVarBytes(r, 0, MAX_RLP_SIZE, "ReceiptValue")
 	if err != nil {
 		return err
 	}
-	a.ReceiptParentNodes, err = ReadVarBytes(r, 0, 4096, "ReceiptParentNodes")
+	a.ReceiptParentNodes, err = ReadVarBytes(r, 0, MAX_RLP_SIZE, "ReceiptParentNodes")
 	if err != nil {
 		return err
 	}
-	a.ReceiptRoot, err = ReadVarBytes(r, 0, 4096, "ReceiptRoot")
+	a.ReceiptRoot, err = ReadVarBytes(r, 0, MAX_RLP_SIZE, "ReceiptRoot")
 	if err != nil {
 		return err
 	}
-	a.ReceiptPath, err = ReadVarBytes(r, 0, 4096, "ReceiptPath")
+	a.ReceiptPath, err = ReadVarBytes(r, 0, MAX_RLP_SIZE, "ReceiptPath")
 	if err != nil {
 		return err
 	}
@@ -481,7 +669,7 @@ func (a *SyscoinBurnToEthereumType) Deserialize(r io.Reader) error {
 	if err != nil {
 		return err
 	}
-	a.EthAddress, err = ReadVarBytes(r, 0, 20, "ethAddress")
+	a.EthAddress, err = ReadVarBytes(r, 0, MAX_GUID_LENGTH, "ethAddress")
 	if err != nil {
 		return err
 	}
