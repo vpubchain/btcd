@@ -240,7 +240,7 @@ func (a *AssetType) Deserialize(r io.Reader) error {
 	if err != nil {
 		return err
 	}
-	if a.UpdateFlags & ASSET_UPDATE_CONTRACT {
+	if (a.UpdateFlags & ASSET_UPDATE_CONTRACT) != 0 {
 		a.Contract, err = ReadVarBytes(r, 0, MAX_GUID_LENGTH, "Contract")
 		if err != nil {
 			return err
@@ -250,7 +250,7 @@ func (a *AssetType) Deserialize(r io.Reader) error {
 			return err
 		}
 	}
-	if a.UpdateFlags & ASSET_UPDATE_DATA {
+	if (a.UpdateFlags & ASSET_UPDATE_DATA) != 0 {
 		a.PubData, err = ReadVarBytes(r, 0, MAX_VALUE_LENGTH, "PubData")
 		if err != nil {
 			return err
@@ -260,7 +260,7 @@ func (a *AssetType) Deserialize(r io.Reader) error {
 			return err
 		}
 	}
-	if a.UpdateFlags & ASSET_UPDATE_SUPPLY {
+	if (a.UpdateFlags & ASSET_UPDATE_SUPPLY) != 0 {
 		valueSat, err := ReadUint(r)
 		if err != nil {
 			return err
@@ -279,7 +279,7 @@ func (a *AssetType) Deserialize(r io.Reader) error {
 		}
 		a.MaxSupply = int64(DecompressAmount(valueSat))
 	}
-	if a.UpdateFlags & ASSET_UPDATE_NOTARY_KEY {
+	if (a.UpdateFlags & ASSET_UPDATE_NOTARY_KEY) != 0 {
 		a.NotaryKeyID, err = ReadVarBytes(r, 0, MAX_GUID_LENGTH, "NotaryKeyID")
 		if err != nil {
 			return err
@@ -289,7 +289,7 @@ func (a *AssetType) Deserialize(r io.Reader) error {
 			return err
 		}
 	}
-	if a.UpdateFlags & ASSET_UPDATE_NOTARY_DETAILS {
+	if (a.UpdateFlags & ASSET_UPDATE_NOTARY_DETAILS) != 0 {
 		err = a.NotaryDetails.Deserialize(r)
 		if err != nil {
 			return err
@@ -299,7 +299,7 @@ func (a *AssetType) Deserialize(r io.Reader) error {
 			return err
 		}
 	}
-	if a.UpdateFlags & ASSET_UPDATE_AUXFEE_KEY {
+	if (a.UpdateFlags & ASSET_UPDATE_AUXFEE_KEY) != 0 {
 		a.AuxFeeKeyID, err = ReadVarBytes(r, 0, MAX_GUID_LENGTH, "AuxFeeKeyID")
 		if err != nil {
 			return err
@@ -309,7 +309,7 @@ func (a *AssetType) Deserialize(r io.Reader) error {
 			return err
 		}
 	}
-	if a.UpdateFlags & ASSET_UPDATE_AUXFEE_DETAILS {
+	if (a.UpdateFlags & ASSET_UPDATE_AUXFEE_DETAILS) != 0 {
 		err = a.AuxFeeDetails.Deserialize(r)
 		if err != nil {
 			return err
@@ -319,7 +319,7 @@ func (a *AssetType) Deserialize(r io.Reader) error {
 			return err
 		}
 	}
-	if a.UpdateFlags & ASSET_UPDATE_CAPABILITYFLAGS {
+	if (a.UpdateFlags & ASSET_UPDATE_CAPABILITYFLAGS) != 0 {
 		a.UpdateCapabilityFlags, err = binarySerializer.Uint8(r)
 		if err != nil {
 			return err
@@ -389,7 +389,7 @@ func (a *AssetType) Serialize(w io.Writer) error {
 	if err != nil {
 		return err
 	}
-	if a.UpdateFlags & ASSET_UPDATE_CONTRACT {
+	if (a.UpdateFlags & ASSET_UPDATE_CONTRACT) != 0 {
 		err = WriteVarBytes(w, 0, a.Contract)
 		if err != nil {
 			return err
@@ -399,7 +399,7 @@ func (a *AssetType) Serialize(w io.Writer) error {
 			return err
 		}
 	}
-	if a.UpdateFlags & ASSET_UPDATE_DATA {
+	if (a.UpdateFlags & ASSET_UPDATE_DATA) != 0 {
 		err = WriteVarBytes(w, 0, a.PubData)
 		if err != nil {
 			return err
@@ -409,7 +409,7 @@ func (a *AssetType) Serialize(w io.Writer) error {
 			return err
 		}
 	}
-	if a.UpdateFlags & ASSET_UPDATE_SUPPLY {
+	if (a.UpdateFlags & ASSET_UPDATE_SUPPLY) != 0 {
 		err = PutUint(w, CompressAmount(uint64(a.Balance)))
 		if err != nil {
 			return err
@@ -423,7 +423,7 @@ func (a *AssetType) Serialize(w io.Writer) error {
 			return err
 		}
 	}
-	if a.UpdateFlags & ASSET_UPDATE_NOTARY_KEY {
+	if (a.UpdateFlags & ASSET_UPDATE_NOTARY_KEY) != 0 {
 		err = WriteVarBytes(w, 0, a.NotaryKeyID)
 		if err != nil {
 			return err
@@ -433,7 +433,7 @@ func (a *AssetType) Serialize(w io.Writer) error {
 			return err
 		}
 	}
-	if a.UpdateFlags & ASSET_UPDATE_NOTARY_DETAILS {
+	if (a.UpdateFlags & ASSET_UPDATE_NOTARY_DETAILS) != 0 {
 		err = a.NotaryDetails.Serialize(w)
 		if err != nil {
 			return err
@@ -443,7 +443,7 @@ func (a *AssetType) Serialize(w io.Writer) error {
 			return err
 		}
 	}
-	if a.UpdateFlags & ASSET_UPDATE_AUXFEE_KEY {
+	if (a.UpdateFlags & ASSET_UPDATE_AUXFEE_KEY) != 0 {
 		err = WriteVarBytes(w, 0, a.AuxFeeKeyID)
 		if err != nil {
 			return err
@@ -453,7 +453,7 @@ func (a *AssetType) Serialize(w io.Writer) error {
 			return err
 		}
 	}
-	if a.UpdateFlags & ASSET_UPDATE_AUXFEE_DETAILS {
+	if (a.UpdateFlags & ASSET_UPDATE_AUXFEE_DETAILS) != 0 {
 		err = a.AuxFeeDetails.Serialize(w)
 		if err != nil {
 			return err
@@ -463,7 +463,7 @@ func (a *AssetType) Serialize(w io.Writer) error {
 			return err
 		}
 	}
-	if a.UpdateFlags & ASSET_UPDATE_CAPABILITYFLAGS {
+	if (a.UpdateFlags & ASSET_UPDATE_CAPABILITYFLAGS) != 0 {
 		err = binarySerializer.PutUint8(w, a.UpdateCapabilityFlags)
 		if err != nil {
 			return err
