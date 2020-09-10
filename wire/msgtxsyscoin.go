@@ -95,7 +95,7 @@ type SyscoinBurnToEthereumType struct {
 
 func PutUint(w io.Writer, n uint64) error {
     tmp := make([]uint8, 10)
-    var len uint8=0
+    var len int8=0
     for  {
 		var mask uint64
 		if len > 0 {
