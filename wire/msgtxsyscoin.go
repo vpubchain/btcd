@@ -25,7 +25,6 @@ const (
  	ASSET_UPDATE_AUXFEE_KEY = 32 // can you update aux fees?
 	ASSET_UPDATE_AUXFEE_DETAILS = 64 // can you update aux fees details?
  	ASSET_UPDATE_CAPABILITYFLAGS = 128 // can you update capability flags?
- 	ASSET_UPDATE_ALL = 255
 )
 type AssetOutValueType struct {
 	N uint32
@@ -550,7 +549,6 @@ func (a *AssetOutValueType) Deserialize(r io.Reader) error {
 	a.ValueSat = int64(DecompressAmount(valueSat))
 	return nil
 }
-
 func (a *AssetOutType) Serialize(w io.Writer) error {
 	err := writeElement(w, a.AssetGuid)
 	if err != nil {
