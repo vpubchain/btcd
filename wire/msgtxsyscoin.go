@@ -7,7 +7,6 @@ package wire
 import (
 	"io"
 	"encoding/binary"
-	"encoding/base64"
 )
 const (
 	MAX_GUID_LENGTH = 20
