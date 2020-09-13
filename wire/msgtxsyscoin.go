@@ -54,7 +54,7 @@ type AssetType struct {
 	Allocation AssetAllocationType
 	Contract []byte
 	PrevContract []byte
-	Symbol string
+	Symbol []byte
 	PubData []byte
 	PrevPubData []byte
 	NotaryKeyID []byte
@@ -239,17 +239,10 @@ func (a *AssetType) Deserialize(r io.Reader) error {
 		return err
 	}
 	a.Precision, err = binarySerializer.Uint8(r)
-	var symbol []byte
-	symbol, err = ReadVarBytes(r, 0, MAX_SYMBOL_SIZE, "Symbol")
+	a.Symbol, err = ReadVarBytes(r, 0, MAX_SYMBOL_SIZE, "Symbol")
 	if err != nil {
 		return err
 	}
-	base64Text := make([]byte, base64.StdEncoding.DecodedLen(len(symbol)))
-	n, err := base64.StdEncoding.Decode(base64Text, symbol)
-	if err != nil {
-		return err
-	}
-	a.Symbol = string(base64Text[:n])
 	a.UpdateFlags, err = binarySerializer.Uint8(r)
 	if err != nil {
 		return err
@@ -398,9 +391,7 @@ func (a *AssetType) Serialize(w io.Writer) error {
 	if err != nil {
 		return err
 	}
-	base64Text := make([]byte, base64.StdEncoding.EncodedLen(len(a.Symbol)))
-	base64.StdEncoding.Encode(base64Text, []byte(a.Symbol))
-	err = WriteVarBytes(w, 0, base64Text)
+	err = WriteVarBytes(w, 0, a.Symbol)
 	if err != nil {
 		return err
 	}
