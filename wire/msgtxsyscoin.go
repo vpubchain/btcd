@@ -82,7 +82,6 @@ type MintSyscoinType struct {
     ReceiptValue []byte
     ReceiptParentNodes []byte
     ReceiptRoot []byte
-    ReceiptPath []byte
     BlockNumber uint32
     BridgeTransferId uint32
 }
@@ -630,10 +629,6 @@ func (a *MintSyscoinType) Deserialize(r io.Reader) error {
 	if err != nil {
 		return err
 	}
-	a.ReceiptPath, err = ReadVarBytes(r, 0, MAX_RLP_SIZE, "ReceiptPath")
-	if err != nil {
-		return err
-	}
 	return nil
 }
 
@@ -675,10 +670,6 @@ func (a *MintSyscoinType) Serialize(w io.Writer) error {
 		return err
 	}
 	err = WriteVarBytes(w, 0, a.ReceiptRoot)
-	if err != nil {
-		return err
-	}
-	err = WriteVarBytes(w, 0, a.ReceiptPath)
 	if err != nil {
 		return err
 	}
