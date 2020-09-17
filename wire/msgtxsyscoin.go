@@ -75,11 +75,11 @@ type AssetType struct {
 
 type MintSyscoinType struct {
 	Allocation AssetAllocationType
-    TxValue []byte
+    TxPos uint16
     TxParentNodes []byte
     TxRoot []byte
     TxPath []byte
-    ReceiptValue []byte
+    ReceiptPos uint16
     ReceiptParentNodes []byte
     ReceiptRoot []byte
     BlockNumber uint32
@@ -601,7 +601,7 @@ func (a *MintSyscoinType) Deserialize(r io.Reader) error {
 	if err != nil {
 		return err
 	}
-	a.TxValue, err = ReadVarBytes(r, 0, MAX_RLP_SIZE, "TxValue")
+	a.TxPos, err = binarySerializer.Uint16(r, binary.LittleEndian)
 	if err != nil {
 		return err
 	}
@@ -617,7 +617,7 @@ func (a *MintSyscoinType) Deserialize(r io.Reader) error {
 	if err != nil {
 		return err
 	}
-	a.ReceiptValue, err = ReadVarBytes(r, 0, MAX_RLP_SIZE, "ReceiptValue")
+	a.ReceiptPos, err = binarySerializer.Uint16(r, binary.LittleEndian)
 	if err != nil {
 		return err
 	}
@@ -645,7 +645,7 @@ func (a *MintSyscoinType) Serialize(w io.Writer) error {
 	if err != nil {
 		return err
 	}
-	err = WriteVarBytes(w, 0, a.TxValue)
+	err = binarySerializer.PutUint16(w, binary.LittleEndian, a.TxPos)
 	if err != nil {
 		return err
 	}
@@ -661,7 +661,7 @@ func (a *MintSyscoinType) Serialize(w io.Writer) error {
 	if err != nil {
 		return err
 	}
-	err = WriteVarBytes(w, 0, a.ReceiptValue)
+	err = binarySerializer.PutUint16(w, binary.LittleEndian, a.ReceiptPos)
 	if err != nil {
 		return err
 	}
