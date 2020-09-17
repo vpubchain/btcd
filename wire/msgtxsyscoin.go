@@ -77,11 +77,9 @@ type MintSyscoinType struct {
 	Allocation AssetAllocationType
     TxPos uint16
     TxParentNodes []byte
-    TxRoot []byte
     TxPath []byte
     ReceiptPos uint16
     ReceiptParentNodes []byte
-    ReceiptRoot []byte
     BlockNumber uint32
     BridgeTransferId uint32
 }
@@ -609,10 +607,6 @@ func (a *MintSyscoinType) Deserialize(r io.Reader) error {
 	if err != nil {
 		return err
 	}
-	a.TxRoot, err = ReadVarBytes(r, 0, MAX_RLP_SIZE, "TxRoot")
-	if err != nil {
-		return err
-	}
 	a.TxPath, err = ReadVarBytes(r, 0, MAX_RLP_SIZE, "TxPath")
 	if err != nil {
 		return err
@@ -622,10 +616,6 @@ func (a *MintSyscoinType) Deserialize(r io.Reader) error {
 		return err
 	}
 	a.ReceiptParentNodes, err = ReadVarBytes(r, 0, MAX_RLP_SIZE, "ReceiptParentNodes")
-	if err != nil {
-		return err
-	}
-	a.ReceiptRoot, err = ReadVarBytes(r, 0, MAX_RLP_SIZE, "ReceiptRoot")
 	if err != nil {
 		return err
 	}
@@ -653,10 +643,6 @@ func (a *MintSyscoinType) Serialize(w io.Writer) error {
 	if err != nil {
 		return err
 	}
-	err = WriteVarBytes(w, 0, a.TxRoot)
-	if err != nil {
-		return err
-	}
 	err = WriteVarBytes(w, 0, a.TxPath)
 	if err != nil {
 		return err
@@ -666,10 +652,6 @@ func (a *MintSyscoinType) Serialize(w io.Writer) error {
 		return err
 	}
 	err = WriteVarBytes(w, 0, a.ReceiptParentNodes)
-	if err != nil {
-		return err
-	}
-	err = WriteVarBytes(w, 0, a.ReceiptRoot)
 	if err != nil {
 		return err
 	}
