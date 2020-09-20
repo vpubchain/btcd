@@ -214,7 +214,8 @@ func (a *AuxFeesType) Deserialize(r io.Reader) error {
 	return nil
 }
 func (a *AuxFeeDetailsType) Deserialize(r io.Reader) error {
-	a.AuxFeeKeyID, err := ReadVarBytes(r, 0, MAX_GUID_LENGTH, "AuxFeeKeyID")
+	var err error
+	a.AuxFeeKeyID, err = ReadVarBytes(r, 0, MAX_GUID_LENGTH, "AuxFeeKeyID")
 	if err != nil {
 		return err
 	}
