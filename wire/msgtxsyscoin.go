@@ -214,7 +214,7 @@ func (a *AuxFeesType) Deserialize(r io.Reader) error {
 	return nil
 }
 func (a *AuxFeeDetailsType) Deserialize(r io.Reader) error {
-	a.AuxFeeKeyID, err = ReadVarBytes(r, 0, MAX_GUID_LENGTH, "AuxFeeKeyID")
+	a.AuxFeeKeyID, err := ReadVarBytes(r, 0, MAX_GUID_LENGTH, "AuxFeeKeyID")
 	if err != nil {
 		return err
 	}
@@ -273,7 +273,7 @@ func (a *AssetType) Deserialize(r io.Reader) error {
 		}
 	}
 	if (a.UpdateFlags & ASSET_UPDATE_SUPPLY) != 0 {
-		valueSat, err = ReadUint(r)
+		valueSat, err := ReadUint(r)
 		if err != nil {
 			return err
 		}
