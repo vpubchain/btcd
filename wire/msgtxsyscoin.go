@@ -21,9 +21,9 @@ const (
  	ASSET_UPDATE_SUPPLY = 4 // can you update supply?
  	ASSET_UPDATE_NOTARY_KEY = 8 // can you update notary?
  	ASSET_UPDATE_NOTARY_DETAILS = 16 // can you update notary details?
- 	ASSET_UPDATE_AUXFEE_KEY = 32 // can you update aux fees?
-	ASSET_UPDATE_AUXFEE_DETAILS = 64 // can you update aux fees details?
- 	ASSET_UPDATE_CAPABILITYFLAGS = 128 // can you update capability flags?
+ 	ASSET_UPDATE_AUXFEE = 32 // can you update aux fees?
+	ASSET_UPDATE_CAPABILITYFLAGS = 64 // can you update capability flags?
+	ASSET_INIT = 128 // set when creating asset
 )
 type AssetOutValueType struct {
 	N uint32
@@ -47,6 +47,7 @@ type AuxFeesType struct {
 	Percent uint16
 }
 type AuxFeeDetailsType struct {
+	AuxFeeKeyID []byte
 	AuxFees []AuxFeesType
 }
 type AssetType struct {
@@ -60,11 +61,8 @@ type AssetType struct {
 	PrevNotaryKeyID []byte
 	NotaryDetails NotaryDetailsType
 	PrevNotaryDetails NotaryDetailsType
-	AuxFeeKeyID []byte
-	PrevAuxFeeKeyID []byte
 	AuxFeeDetails AuxFeeDetailsType
 	PrevAuxFeeDetails AuxFeeDetailsType
-	Balance int64
 	TotalSupply int64
 	MaxSupply int64
 	Precision uint8
@@ -216,6 +214,10 @@ func (a *AuxFeesType) Deserialize(r io.Reader) error {
 	return nil
 }
 func (a *AuxFeeDetailsType) Deserialize(r io.Reader) error {
+	a.AuxFeeKeyID, err = ReadVarBytes(r, 0, MAX_GUID_LENGTH, "AuxFeeKeyID")
+	if err != nil {
+		return err
+	}
 	numAuxFees, err := ReadVarInt(r, 0)
 	if err != nil {
 		return err
@@ -235,13 +237,20 @@ func (a *AssetType) Deserialize(r io.Reader) error {
 		return err
 	}
 	a.Precision, err = binarySerializer.Uint8(r)
-	a.Symbol, err = ReadVarBytes(r, 0, MAX_SYMBOL_SIZE, "Symbol")
-	if err != nil {
-		return err
-	}
 	a.UpdateFlags, err = binarySerializer.Uint8(r)
 	if err != nil {
 		return err
+	}
+	if (a.UpdateFlags & ASSET_INIT) != 0 {
+		a.Symbol, err = ReadVarBytes(r, 0, MAX_SYMBOL_SIZE, "Symbol")
+		if err != nil {
+			return err
+		}
+		valueSat, err := ReadUint(r)
+		if err != nil {
+			return err
+		}
+		a.MaxSupply = int64(DecompressAmount(valueSat))
 	}
 	if (a.UpdateFlags & ASSET_UPDATE_CONTRACT) != 0 {
 		a.Contract, err = ReadVarBytes(r, 0, MAX_GUID_LENGTH, "Contract")
@@ -264,23 +273,11 @@ func (a *AssetType) Deserialize(r io.Reader) error {
 		}
 	}
 	if (a.UpdateFlags & ASSET_UPDATE_SUPPLY) != 0 {
-		valueSat, err := ReadUint(r)
-		if err != nil {
-			return err
-		}
-		a.Balance = int64(DecompressAmount(valueSat))
-
 		valueSat, err = ReadUint(r)
 		if err != nil {
 			return err
 		}
 		a.TotalSupply = int64(DecompressAmount(valueSat))
-
-		valueSat, err = ReadUint(r)
-		if err != nil {
-			return err
-		}
-		a.MaxSupply = int64(DecompressAmount(valueSat))
 	}
 	if (a.UpdateFlags & ASSET_UPDATE_NOTARY_KEY) != 0 {
 		a.NotaryKeyID, err = ReadVarBytes(r, 0, MAX_GUID_LENGTH, "NotaryKeyID")
@@ -302,17 +299,7 @@ func (a *AssetType) Deserialize(r io.Reader) error {
 			return err
 		}
 	}
-	if (a.UpdateFlags & ASSET_UPDATE_AUXFEE_KEY) != 0 {
-		a.AuxFeeKeyID, err = ReadVarBytes(r, 0, MAX_GUID_LENGTH, "AuxFeeKeyID")
-		if err != nil {
-			return err
-		}
-		a.PrevAuxFeeKeyID, err = ReadVarBytes(r, 0, MAX_GUID_LENGTH, "PrevAuxFeeKeyID")
-		if err != nil {
-			return err
-		}
-	}
-	if (a.UpdateFlags & ASSET_UPDATE_AUXFEE_DETAILS) != 0 {
+	if (a.UpdateFlags & ASSET_UPDATE_AUXFEE) != 0 {
 		err = a.AuxFeeDetails.Deserialize(r)
 		if err != nil {
 			return err
@@ -364,8 +351,12 @@ func (a *AuxFeesType) Serialize(w io.Writer) error {
 	return nil
 }
 func (a *AuxFeeDetailsType) Serialize(w io.Writer) error {
+	err := WriteVarBytes(w, 0, a.AuxFeeKeyID)
+	if err != nil {
+		return err
+	}
 	lenAuxFees := len(a.AuxFees)
-	err := WriteVarInt(w, 0, uint64(lenAuxFees))
+	err = WriteVarInt(w, 0, uint64(lenAuxFees))
 	if err != nil {
 		return err
 	}
@@ -387,13 +378,19 @@ func (a *AssetType) Serialize(w io.Writer) error {
 	if err != nil {
 		return err
 	}
-	err = WriteVarBytes(w, 0, a.Symbol)
-	if err != nil {
-		return err
-	}
 	err = binarySerializer.PutUint8(w, a.UpdateFlags)
 	if err != nil {
 		return err
+	}
+	if (a.UpdateFlags & ASSET_INIT) != 0 {
+		err = WriteVarBytes(w, 0, a.Symbol)
+		if err != nil {
+			return err
+		}
+		err = PutUint(w, CompressAmount(uint64(a.MaxSupply)))
+		if err != nil {
+			return err
+		}
 	}
 	if (a.UpdateFlags & ASSET_UPDATE_CONTRACT) != 0 {
 		err = WriteVarBytes(w, 0, a.Contract)
@@ -416,15 +413,7 @@ func (a *AssetType) Serialize(w io.Writer) error {
 		}
 	}
 	if (a.UpdateFlags & ASSET_UPDATE_SUPPLY) != 0 {
-		err = PutUint(w, CompressAmount(uint64(a.Balance)))
-		if err != nil {
-			return err
-		}
 		err = PutUint(w, CompressAmount(uint64(a.TotalSupply)))
-		if err != nil {
-			return err
-		}
-		err = PutUint(w, CompressAmount(uint64(a.MaxSupply)))
 		if err != nil {
 			return err
 		}
@@ -449,17 +438,7 @@ func (a *AssetType) Serialize(w io.Writer) error {
 			return err
 		}
 	}
-	if (a.UpdateFlags & ASSET_UPDATE_AUXFEE_KEY) != 0 {
-		err = WriteVarBytes(w, 0, a.AuxFeeKeyID)
-		if err != nil {
-			return err
-		}
-		err = WriteVarBytes(w, 0, a.PrevAuxFeeKeyID)
-		if err != nil {
-			return err
-		}
-	}
-	if (a.UpdateFlags & ASSET_UPDATE_AUXFEE_DETAILS) != 0 {
+	if (a.UpdateFlags & ASSET_UPDATE_AUXFEE) != 0 {
 		err = a.AuxFeeDetails.Serialize(w)
 		if err != nil {
 			return err
