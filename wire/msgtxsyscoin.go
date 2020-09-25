@@ -76,6 +76,8 @@ type MintSyscoinType struct {
     TxPos uint16
     TxParentNodes []byte
     TxPath []byte
+    TxRoot []byte
+    ReceiptRoot []byte
     ReceiptPos uint16
     ReceiptParentNodes []byte
     BlockNumber uint32
@@ -238,6 +240,9 @@ func (a *AssetType) Deserialize(r io.Reader) error {
 		return err
 	}
 	a.Precision, err = binarySerializer.Uint8(r)
+	if err != nil {
+		return err
+	}
 	a.UpdateFlags, err = binarySerializer.Uint8(r)
 	if err != nil {
 		return err
@@ -599,6 +604,14 @@ func (a *MintSyscoinType) Deserialize(r io.Reader) error {
 	if err != nil {
 		return err
 	}
+	a.TxRoot, err = ReadVarBytes(r, 0, MAX_RLP_SIZE, "TxRoot")
+	if err != nil {
+		return err
+	}
+	a.ReceiptRoot, err = ReadVarBytes(r, 0, MAX_RLP_SIZE, "ReceiptRoot")
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -632,6 +645,14 @@ func (a *MintSyscoinType) Serialize(w io.Writer) error {
 		return err
 	}
 	err = WriteVarBytes(w, 0, a.ReceiptParentNodes)
+	if err != nil {
+		return err
+	}
+	err = WriteVarBytes(w, 0, a.TxRoot)
+	if err != nil {
+		return err
+	}
+	err = WriteVarBytes(w, 0, a.ReceiptRoot)
 	if err != nil {
 		return err
 	}
