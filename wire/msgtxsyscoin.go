@@ -189,7 +189,7 @@ func DecompressAmount(x uint64) uint64 {
 
 func (a *NotaryDetailsType) Deserialize(r io.Reader) error {
 	var err error
-	a.EndPoint, err := ReadVarBytes(r, 0, MAX_VALUE_LENGTH, "EndPoint")
+	a.EndPoint, err = ReadVarBytes(r, 0, MAX_VALUE_LENGTH, "EndPoint")
 	if err != nil {
 		return err
 	}
@@ -217,7 +217,7 @@ func (a *AuxFeesType) Deserialize(r io.Reader) error {
 }
 func (a *AuxFeeDetailsType) Deserialize(r io.Reader) error {
 	var err error
-	a.AuxFeeKeyID, err := ReadVarBytes(r, 0, MAX_GUID_LENGTH, "AuxFeeKeyID")
+	a.AuxFeeKeyID, err = ReadVarBytes(r, 0, MAX_GUID_LENGTH, "AuxFeeKeyID")
 	if err != nil {
 		return err
 	}
@@ -540,7 +540,7 @@ func (a *AssetOutType) Serialize(w io.Writer) error {
 			return err
 		}
 	}
-	err = WriteVarBytes(w, 0, a.NotarySig))
+	err = WriteVarBytes(w, 0, a.NotarySig)
 	if err != nil {
 		return err
 	}
@@ -563,7 +563,7 @@ func (a *AssetOutType) Deserialize(r io.Reader) error {
 			return err
 		}
 	}
-	a.NotarySig, err := ReadVarBytes(r, 0, MAX_SIG_SIZE, "NotarySig")
+	a.NotarySig, err = ReadVarBytes(r, 0, MAX_SIG_SIZE, "NotarySig")
 	if err != nil {
 		return err
 	}
@@ -664,7 +664,7 @@ func (a *SyscoinBurnToEthereumType) Deserialize(r io.Reader) error {
 	if err != nil {
 		return err
 	}
-	a.EthAddress, err := ReadVarBytes(r, 0, MAX_GUID_LENGTH, "ethAddress")
+	a.EthAddress, err = ReadVarBytes(r, 0, MAX_GUID_LENGTH, "ethAddress")
 	if err != nil {
 		return err
 	}
