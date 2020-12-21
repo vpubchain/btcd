@@ -38,7 +38,7 @@ type AssetAllocationType struct {
 	VoutAssets []AssetOutType
 }
 type NotaryDetailsType struct {
-	EndPoint []byte        `json:"endPoint,omitempty"`
+	EndPoint string        `json:"endPoint,omitempty"`
 	InstantTransfers uint8 `json:"instantTransfers,omitempty"`
 	HDRequired uint8       `json:"HDRequired,omitempty"`
 }
@@ -189,10 +189,11 @@ func DecompressAmount(x uint64) uint64 {
 
 func (a *NotaryDetailsType) Deserialize(r io.Reader) error {
 	var err error
-	a.EndPoint, err = ReadVarBytes(r, 0, MAX_VALUE_LENGTH, "EndPoint")
+	EndPoint, err := ReadVarBytes(r, 0, MAX_VALUE_LENGTH, "EndPoint")
 	if err != nil {
 		return err
 	}
+	a.EndPoint = string(EndPoint)
 	a.InstantTransfers, err = binarySerializer.Uint8(r)
 	if err != nil {
 		return err
@@ -331,7 +332,7 @@ func (a *AssetType) Deserialize(r io.Reader) error {
 
 
 func (a *NotaryDetailsType) Serialize(w io.Writer) error {
-	err := WriteVarBytes(w, 0, a.EndPoint)
+	err := WriteVarBytes(w, 0, ([]byte)(a.EndPoint))
 	if err != nil {
 		return err
 	}
