@@ -32,13 +32,13 @@ type AssetOutValueType struct {
 type AssetOutType struct {
 	AssetGuid uint32
 	Values []AssetOutValueType
-	NotarySig string
+	NotarySig []byte
 }
 type AssetAllocationType struct {
 	VoutAssets []AssetOutType
 }
 type NotaryDetailsType struct {
-	EndPoint string        `json:"endPoint,omitempty"`
+	EndPoint []byte        `json:"endPoint,omitempty"`
 	InstantTransfers uint8 `json:"instantTransfers,omitempty"`
 	HDRequired uint8       `json:"HDRequired,omitempty"`
 }
@@ -47,7 +47,7 @@ type AuxFeesType struct {
 	Percent uint16 `json:"percent,omitempty"`
 }
 type AuxFeeDetailsType struct {
-	AuxFeeKeyID string    `json:"auxFeeKeyID,omitempty"`
+	AuxFeeKeyID []byte    `json:"auxFeeKeyID,omitempty"`
 	AuxFees []AuxFeesType `json:"auxFees,omitempty"`
 }
 type AssetType struct {
@@ -86,7 +86,7 @@ type MintSyscoinType struct {
 
 type SyscoinBurnToEthereumType struct {
 	Allocation AssetAllocationType
-	EthAddress string
+	EthAddress []byte `json:"ethAddress,omitempty"`
 }
 
 func PutUint(w io.Writer, n uint64) error {
@@ -189,11 +189,10 @@ func DecompressAmount(x uint64) uint64 {
 
 func (a *NotaryDetailsType) Deserialize(r io.Reader) error {
 	var err error
-	EndPoint, err := ReadVarBytes(r, 0, MAX_VALUE_LENGTH, "EndPoint")
+	a.EndPoint, err := ReadVarBytes(r, 0, MAX_VALUE_LENGTH, "EndPoint")
 	if err != nil {
 		return err
 	}
-	a.EndPoint = string(EndPoint)
 	a.InstantTransfers, err = binarySerializer.Uint8(r)
 	if err != nil {
 		return err
@@ -218,11 +217,10 @@ func (a *AuxFeesType) Deserialize(r io.Reader) error {
 }
 func (a *AuxFeeDetailsType) Deserialize(r io.Reader) error {
 	var err error
-	AuxFeeKeyID, err := ReadVarBytes(r, 0, MAX_GUID_LENGTH, "AuxFeeKeyID")
+	a.AuxFeeKeyID, err := ReadVarBytes(r, 0, MAX_GUID_LENGTH, "AuxFeeKeyID")
 	if err != nil {
 		return err
 	}
-	a.AuxFeeKeyID = string(AuxFeeKeyID)
 	numAuxFees, err := ReadVarInt(r, 0)
 	if err != nil {
 		return err
@@ -333,7 +331,7 @@ func (a *AssetType) Deserialize(r io.Reader) error {
 
 
 func (a *NotaryDetailsType) Serialize(w io.Writer) error {
-	err := WriteVarBytes(w, 0, ([]byte)(a.EndPoint))
+	err := WriteVarBytes(w, 0, a.EndPoint)
 	if err != nil {
 		return err
 	}
@@ -359,7 +357,7 @@ func (a *AuxFeesType) Serialize(w io.Writer) error {
 	return nil
 }
 func (a *AuxFeeDetailsType) Serialize(w io.Writer) error {
-	err := WriteVarBytes(w, 0, ([]byte)(a.AuxFeeKeyID))
+	err := WriteVarBytes(w, 0, a.AuxFeeKeyID)
 	if err != nil {
 		return err
 	}
@@ -542,7 +540,7 @@ func (a *AssetOutType) Serialize(w io.Writer) error {
 			return err
 		}
 	}
-	err = WriteVarBytes(w, 0, ([]byte)(a.NotarySig))
+	err = WriteVarBytes(w, 0, a.NotarySig))
 	if err != nil {
 		return err
 	}
@@ -565,11 +563,10 @@ func (a *AssetOutType) Deserialize(r io.Reader) error {
 			return err
 		}
 	}
-	NotarySig, err := ReadVarBytes(r, 0, MAX_SIG_SIZE, "NotarySig")
+	a.NotarySig, err := ReadVarBytes(r, 0, MAX_SIG_SIZE, "NotarySig")
 	if err != nil {
 		return err
 	}
-	a.NotarySig = string(NotarySig)
 	return nil
 }
 
@@ -667,11 +664,10 @@ func (a *SyscoinBurnToEthereumType) Deserialize(r io.Reader) error {
 	if err != nil {
 		return err
 	}
-	EthAddress, err := ReadVarBytes(r, 0, MAX_GUID_LENGTH, "ethAddress")
+	a.EthAddress, err := ReadVarBytes(r, 0, MAX_GUID_LENGTH, "ethAddress")
 	if err != nil {
 		return err
 	}
-	a.EthAddress = string(EthAddress)
 	return nil
 }
 
@@ -680,7 +676,7 @@ func (a *SyscoinBurnToEthereumType) Serialize(w io.Writer) error {
 	if err != nil {
 		return err
 	}
-	err = WriteVarBytes(w, 0, ([]byte)(a.EthAddress))
+	err = WriteVarBytes(w, 0, a.EthAddress)
 	if err != nil {
 		return err
 	}
