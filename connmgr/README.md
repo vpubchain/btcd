@@ -29,7 +29,7 @@ In addition the connection manager provides the following utilities:
 ## Installation and Updating
 
 ```bash
-$ go get -u github.com/martinboehm/btcd/connmgr
+$ go get -u github.com/syscoin/btcd/connmgr
 ```
 
 ## License

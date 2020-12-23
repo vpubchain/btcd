@@ -12,7 +12,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/martinboehm/btcd/btcjson"
+	"github.com/syscoin/btcd/btcjson"
 )
 
 // TestBtcdExtCmds tests all of the btcd extended commands marshal and unmarshal

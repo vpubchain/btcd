@@ -21,7 +21,7 @@ block chain.
 ## Installation and Updating
 
 ```bash
-$ go get -u github.com/martinboehm/btcd/blockchain
+$ go get -u github.com/syscoin/btcd/blockchain
 ```
 
 ## Bitcoin Chain Processing Overview

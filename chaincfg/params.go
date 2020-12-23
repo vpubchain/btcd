@@ -11,8 +11,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/martinboehm/btcd/chaincfg/chainhash"
-	"github.com/martinboehm/btcd/wire"
+	"github.com/syscoin/btcd/chaincfg/chainhash"
+	"github.com/syscoin/btcd/wire"
 )
 
 // These variables are the chain proof-of-work limit parameters for each default

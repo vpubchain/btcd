@@ -7,7 +7,7 @@ package addrmgr
 import (
 	"time"
 
-	"github.com/martinboehm/btcd/wire"
+	"github.com/syscoin/btcd/wire"
 )
 
 // KnownAddress tracks information about a known network address that is used

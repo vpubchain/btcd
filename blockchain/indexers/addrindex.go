@@ -9,12 +9,12 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/martinboehm/btcd/blockchain"
-	"github.com/martinboehm/btcd/chaincfg"
-	"github.com/martinboehm/btcd/chaincfg/chainhash"
-	"github.com/martinboehm/btcd/database"
-	"github.com/martinboehm/btcd/txscript"
-	"github.com/martinboehm/btcd/wire"
+	"github.com/syscoin/btcd/blockchain"
+	"github.com/syscoin/btcd/chaincfg"
+	"github.com/syscoin/btcd/chaincfg/chainhash"
+	"github.com/syscoin/btcd/database"
+	"github.com/syscoin/btcd/txscript"
+	"github.com/syscoin/btcd/wire"
 	"github.com/martinboehm/btcutil"
 )
 

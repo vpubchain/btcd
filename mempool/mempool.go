@@ -12,14 +12,14 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/martinboehm/btcd/blockchain"
-	"github.com/martinboehm/btcd/blockchain/indexers"
-	"github.com/martinboehm/btcd/btcjson"
-	"github.com/martinboehm/btcd/chaincfg"
-	"github.com/martinboehm/btcd/chaincfg/chainhash"
-	"github.com/martinboehm/btcd/mining"
-	"github.com/martinboehm/btcd/txscript"
-	"github.com/martinboehm/btcd/wire"
+	"github.com/syscoin/btcd/blockchain"
+	"github.com/syscoin/btcd/blockchain/indexers"
+	"github.com/syscoin/btcd/btcjson"
+	"github.com/syscoin/btcd/chaincfg"
+	"github.com/syscoin/btcd/chaincfg/chainhash"
+	"github.com/syscoin/btcd/mining"
+	"github.com/syscoin/btcd/txscript"
+	"github.com/syscoin/btcd/wire"
 	"github.com/martinboehm/btcutil"
 )
 

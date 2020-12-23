@@ -10,10 +10,10 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/martinboehm/btcd/chaincfg"
-	"github.com/martinboehm/btcd/database"
-	_ "github.com/martinboehm/btcd/database/ffldb"
-	"github.com/martinboehm/btcd/wire"
+	"github.com/syscoin/btcd/chaincfg"
+	"github.com/syscoin/btcd/database"
+	_ "github.com/syscoin/btcd/database/ffldb"
+	"github.com/syscoin/btcd/wire"
 	"github.com/martinboehm/btcutil"
 )
 

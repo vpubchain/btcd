@@ -7,7 +7,7 @@ package txscript
 import (
 	"fmt"
 
-	"github.com/martinboehm/btcd/wire"
+	"github.com/syscoin/btcd/wire"
 	"github.com/martinboehm/btcutil"
 	"github.com/martinboehm/btcutil/chaincfg"
 )

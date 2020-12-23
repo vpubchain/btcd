@@ -74,7 +74,7 @@ be an exhaustive list.
 ## Installation and Updating
 
 ```bash
-$ go get -u github.com/martinboehm/btcd/mempool
+$ go get -u github.com/syscoin/btcd/mempool
 ```
 
 ## License

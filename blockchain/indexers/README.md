@@ -23,7 +23,7 @@ via an RPC interface.
 ## Installation
 
 ```bash
-$ go get -u github.com/martinboehm/btcd/blockchain/indexers
+$ go get -u github.com/syscoin/btcd/blockchain/indexers
 ```
 
 ## License

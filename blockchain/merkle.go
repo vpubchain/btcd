@@ -9,8 +9,8 @@ import (
 	"fmt"
 	"math"
 
-	"github.com/martinboehm/btcd/chaincfg/chainhash"
-	"github.com/martinboehm/btcd/txscript"
+	"github.com/syscoin/btcd/chaincfg/chainhash"
+	"github.com/syscoin/btcd/txscript"
 	"github.com/martinboehm/btcutil"
 )
 

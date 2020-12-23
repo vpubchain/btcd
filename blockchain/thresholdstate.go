@@ -7,7 +7,7 @@ package blockchain
 import (
 	"fmt"
 
-	"github.com/martinboehm/btcd/chaincfg/chainhash"
+	"github.com/syscoin/btcd/chaincfg/chainhash"
 )
 
 // ThresholdState define the various threshold states used when voting on

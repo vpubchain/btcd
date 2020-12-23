@@ -5,8 +5,8 @@
 package blockchain
 
 import (
-	"github.com/martinboehm/btcd/btcec"
-	"github.com/martinboehm/btcd/txscript"
+	"github.com/syscoin/btcd/btcec"
+	"github.com/syscoin/btcd/txscript"
 )
 
 // -----------------------------------------------------------------------------
