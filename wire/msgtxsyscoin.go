@@ -30,7 +30,7 @@ type AssetOutValueType struct {
 	ValueSat int64
 }
 type AssetOutType struct {
-	AssetGuid uint32
+	AssetGuid uint64
 	Values []AssetOutValueType
 	NotarySig []byte
 }
