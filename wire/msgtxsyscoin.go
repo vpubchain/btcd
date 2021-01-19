@@ -549,6 +549,7 @@ func (a *AssetOutType) Serialize(w io.Writer) error {
 }
 
 func (a *AssetOutType) Deserialize(r io.Reader) error {
+	var err error
 	a.AssetGuid, err = ReadUint(r)
 	if err != nil {
 		return err
