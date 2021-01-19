@@ -526,7 +526,7 @@ func (a *AssetOutValueType) Deserialize(r io.Reader) error {
 	return nil
 }
 func (a *AssetOutType) Serialize(w io.Writer) error {
-	err := writeElement(w, a.AssetGuid)
+	err := PutUint(w, a.AssetGuid)
 	if err != nil {
 		return err
 	}
@@ -549,7 +549,7 @@ func (a *AssetOutType) Serialize(w io.Writer) error {
 }
 
 func (a *AssetOutType) Deserialize(r io.Reader) error {
-	err := readElement(r, &a.AssetGuid)
+	a.AssetGuid, err := ReadUint(r)
 	if err != nil {
 		return err
 	}
