@@ -14,6 +14,8 @@ const (
 	MAX_SYMBOL_SIZE = 12 // up to 9 characters base64 decoded
 	MAX_SIG_SIZE = 65
 	MAX_RLP_SIZE = 4096
+	HASH_SIZE = 32
+	MAX_NEVM_BLOCK_SIZE = (32 << 20) // 32 MiB
 )
 const ( 	
 	ASSET_UPDATE_DATA = 1 // can you update public data field?
@@ -87,6 +89,15 @@ type MintSyscoinType struct {
 type SyscoinBurnToEthereumType struct {
 	Allocation AssetAllocationType
 	EthAddress []byte `json:"ethAddress,omitempty"`
+}
+
+type NEVMBlockWire struct {
+	NEVMBlockHash []byte
+	TxRoot []byte
+	ReceiptRoot []byte
+	NEVMBlockData []byte
+	SYSBlockHash []byte
+	WaitForResponse bool
 }
 
 func PutUint(w io.Writer, n uint64) error {
@@ -185,6 +196,41 @@ func DecompressAmount(x uint64) uint64 {
         e--
     }
     return n
+}
+
+func (a *NEVMBlockWire) Deserialize(r io.Reader) error {
+	var err error
+	a.NEVMBlockHash = make([]byte, HASH_SIZE)
+	_, err = io.ReadFull(r, a.NEVMBlockHash)
+	if err != nil {
+		return err
+	}
+	err = readElement(r, &a.NEVMBlockHash)
+	if err != nil {
+		return err
+	}
+	a.TxRoot, err = ReadVarBytes(r, 0, HASH_SIZE, "TxRoot")
+	if err != nil {
+		return err
+	}
+	a.ReceiptRoot, err = ReadVarBytes(r, 0, HASH_SIZE, "ReceiptRoot")
+	if err != nil {
+		return err
+	}
+	a.NEVMBlockData, err = ReadVarBytes(r, 0, MAX_NEVM_BLOCK_SIZE, "NEVMBlockData")
+	if err != nil {
+		return err
+	}
+	a.SYSBlockHash = make([]byte, HASH_SIZE)
+	_, err = io.ReadFull(r, a.SYSBlockHash)
+	if err != nil {
+		return err
+	}
+	err = readElement(r, &a.WaitForResponse)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (a *NotaryDetailsType) Deserialize(r io.Reader) error {
