@@ -233,6 +233,27 @@ func (a *NEVMBlockWire) Deserialize(r io.Reader) error {
 	return nil
 }
 
+func (a *NEVMBlockWire) Serialize(w io.Writer) error {
+	var err error
+	_, err = w.Write(a.NEVMBlockHash[:])
+	if err != nil {
+		return err
+	}
+	err = WriteVarBytes(w, 0, a.TxRoot)
+	if err != nil {
+		return err
+	}
+	err = WriteVarBytes(w, 0, a.ReceiptRoot)
+	if err != nil {
+		return err
+	}
+	err = WriteVarBytes(w, 0, a.NEVMBlockData)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func (a *NotaryDetailsType) Deserialize(r io.Reader) error {
 	var err error
 	EndPoint, err := ReadVarBytes(r, 0, MAX_VALUE_LENGTH, "EndPoint")
