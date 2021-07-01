@@ -205,10 +205,6 @@ func (a *NEVMBlockWire) Deserialize(r io.Reader) error {
 	if err != nil {
 		return err
 	}
-	err = readElement(r, &a.NEVMBlockHash)
-	if err != nil {
-		return err
-	}
 	a.TxRoot, err = ReadVarBytes(r, 0, HASH_SIZE, "TxRoot")
 	if err != nil {
 		return err
