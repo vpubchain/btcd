@@ -97,7 +97,6 @@ type NEVMBlockWire struct {
 	ReceiptRoot []byte
 	NEVMBlockData []byte
 	SYSBlockHash []byte
-	WaitForResponse bool
 }
 
 func PutUint(w io.Writer, n uint64) error {
@@ -219,10 +218,6 @@ func (a *NEVMBlockWire) Deserialize(r io.Reader) error {
 	}
 	a.SYSBlockHash = make([]byte, HASH_SIZE)
 	_, err = io.ReadFull(r, a.SYSBlockHash)
-	if err != nil {
-		return err
-	}
-	err = readElement(r, &a.WaitForResponse)
 	if err != nil {
 		return err
 	}
