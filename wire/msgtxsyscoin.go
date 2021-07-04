@@ -93,6 +93,7 @@ type SyscoinBurnToEthereumType struct {
 
 type NEVMBlockWire struct {
 	NEVMBlockHash []byte
+	NEVMParentBlockHash []byte
 	TxRoot []byte
 	ReceiptRoot []byte
 	NEVMBlockData []byte
@@ -204,6 +205,11 @@ func (a *NEVMBlockWire) Deserialize(r io.Reader) error {
 	if err != nil {
 		return err
 	}
+	a.NEVMParentBlockHash = make([]byte, HASH_SIZE)
+	_, err = io.ReadFull(r, a.NEVMParentBlockHash)
+	if err != nil {
+		return err
+	}
 	a.TxRoot, err = ReadVarBytes(r, 0, HASH_SIZE, "TxRoot")
 	if err != nil {
 		return err
@@ -227,6 +233,10 @@ func (a *NEVMBlockWire) Deserialize(r io.Reader) error {
 func (a *NEVMBlockWire) Serialize(w io.Writer) error {
 	var err error
 	_, err = w.Write(a.NEVMBlockHash[:])
+	if err != nil {
+		return err
+	}
+	_, err = w.Write(a.NEVMParentBlockHash[:])
 	if err != nil {
 		return err
 	}
