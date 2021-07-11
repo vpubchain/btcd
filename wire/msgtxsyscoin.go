@@ -691,12 +691,11 @@ func (a *MintSyscoinType) Serialize(w io.Writer) error {
 	if err != nil {
 		return err
 	}
-	
-	err = writeElement(w, a.BridgeTransferId)
+	err = WriteVarBytes(w, 0, a.StrTxHash)
 	if err != nil {
 		return err
 	}
-	err = writeElement(w, a.BlockNumber)
+	_, err = w.Write(a.BlockHash[:])
 	if err != nil {
 		return err
 	}
