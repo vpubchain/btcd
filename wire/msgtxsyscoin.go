@@ -75,6 +75,8 @@ type AssetType struct {
 
 type MintSyscoinType struct {
 	Allocation AssetAllocationType
+	StrTxHash []byte
+	BlockHash []byte
     TxPos uint16
     TxParentNodes []byte
     TxPath []byte
@@ -82,8 +84,6 @@ type MintSyscoinType struct {
     ReceiptRoot []byte
     ReceiptPos uint16
     ReceiptParentNodes []byte
-    BlockNumber uint32
-    BridgeTransferId uint32
 }
 
 type SyscoinBurnToEthereumType struct {
@@ -646,11 +646,12 @@ func (a *MintSyscoinType) Deserialize(r io.Reader) error {
 	if err != nil {
 		return err
 	}
-	err = readElement(r, &a.BridgeTransferId)
+	a.StrTxHash, err = ReadVarBytes(r, 0, MAX_SIG_SIZE, "StrTxHash")
 	if err != nil {
 		return err
 	}
-	err = readElement(r, &a.BlockNumber)
+	a.BlockHash = make([]byte, HASH_SIZE)
+	_, err = io.ReadFull(r, a.BlockHash)
 	if err != nil {
 		return err
 	}
@@ -690,6 +691,7 @@ func (a *MintSyscoinType) Serialize(w io.Writer) error {
 	if err != nil {
 		return err
 	}
+	
 	err = writeElement(w, a.BridgeTransferId)
 	if err != nil {
 		return err
