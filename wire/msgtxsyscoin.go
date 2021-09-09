@@ -75,7 +75,7 @@ type AssetType struct {
 
 type MintSyscoinType struct {
 	Allocation AssetAllocationType
-	StrTxHash []byte
+	TxHash []byte
 	BlockHash []byte
     TxPos uint16
     TxParentNodes []byte
@@ -210,11 +210,13 @@ func (a *NEVMBlockWire) Deserialize(r io.Reader) error {
 	if err != nil {
 		return err
 	}
-	a.TxRoot, err = ReadVarBytes(r, 0, HASH_SIZE, "TxRoot")
+	a.TxRoot = make([]byte, HASH_SIZE)
+	_, err = io.ReadFull(r, a.TxRoot)
 	if err != nil {
 		return err
 	}
-	a.ReceiptRoot, err = ReadVarBytes(r, 0, HASH_SIZE, "ReceiptRoot")
+	a.ReceiptRoot = make([]byte, HASH_SIZE)
+	_, err = io.ReadFull(r, a.ReceiptRoot)
 	if err != nil {
 		return err
 	}
@@ -240,11 +242,11 @@ func (a *NEVMBlockWire) Serialize(w io.Writer) error {
 	if err != nil {
 		return err
 	}
-	err = WriteVarBytes(w, 0, a.TxRoot)
+	_, err = w.Write(a.TxRoot[:])
 	if err != nil {
 		return err
 	}
-	err = WriteVarBytes(w, 0, a.ReceiptRoot)
+	_, err = w.Write(a.ReceiptRoot[:])
 	if err != nil {
 		return err
 	}
@@ -646,7 +648,8 @@ func (a *MintSyscoinType) Deserialize(r io.Reader) error {
 	if err != nil {
 		return err
 	}
-	a.StrTxHash, err = ReadVarBytes(r, 0, MAX_SIG_SIZE, "StrTxHash")
+	a.TxHash = make([]byte, HASH_SIZE)
+	_, err = io.ReadFull(r, a.TxHash)
 	if err != nil {
 		return err
 	}
@@ -675,11 +678,13 @@ func (a *MintSyscoinType) Deserialize(r io.Reader) error {
 	if err != nil {
 		return err
 	}
-	a.TxRoot, err = ReadVarBytes(r, 0, MAX_RLP_SIZE, "TxRoot")
+	a.TxRoot = make([]byte, HASH_SIZE)
+	_, err = io.ReadFull(r, a.TxRoot)
 	if err != nil {
 		return err
 	}
-	a.ReceiptRoot, err = ReadVarBytes(r, 0, MAX_RLP_SIZE, "ReceiptRoot")
+	a.ReceiptRoot = make([]byte, HASH_SIZE)
+	_, err = io.ReadFull(r, a.ReceiptRoot)
 	if err != nil {
 		return err
 	}
@@ -691,7 +696,7 @@ func (a *MintSyscoinType) Serialize(w io.Writer) error {
 	if err != nil {
 		return err
 	}
-	err = WriteVarBytes(w, 0, a.StrTxHash)
+	_, err = w.Write(a.TxHash[:])
 	if err != nil {
 		return err
 	}
@@ -719,11 +724,11 @@ func (a *MintSyscoinType) Serialize(w io.Writer) error {
 	if err != nil {
 		return err
 	}
-	err = WriteVarBytes(w, 0, a.TxRoot)
+	_, err = w.Write(a.TxRoot[:])
 	if err != nil {
 		return err
 	}
-	err = WriteVarBytes(w, 0, a.ReceiptRoot)
+	_, err = w.Write(a.ReceiptRoot[:])
 	if err != nil {
 		return err
 	}
