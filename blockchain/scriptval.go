@@ -10,9 +10,9 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/syscoin/btcd/txscript"
-	"github.com/syscoin/btcd/wire"
 	"github.com/martinboehm/btcutil"
+	"github.com/vpubchain/btcd/txscript"
+	"github.com/vpubchain/btcd/wire"
 )
 
 // txValidateItem holds a transaction along with which input to validate.

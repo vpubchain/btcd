@@ -9,11 +9,11 @@ import (
 	"path/filepath"
 	"runtime"
 
-	"github.com/syscoin/btcd/blockchain"
-	"github.com/syscoin/btcd/blockchain/indexers"
-	"github.com/syscoin/btcd/database"
-	"github.com/syscoin/btcd/limits"
 	"github.com/btcsuite/btclog"
+	"github.com/vpubchain/btcd/blockchain"
+	"github.com/vpubchain/btcd/blockchain/indexers"
+	"github.com/vpubchain/btcd/database"
+	"github.com/vpubchain/btcd/limits"
 )
 
 const (

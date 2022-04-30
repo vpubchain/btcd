@@ -10,15 +10,15 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/syscoin/btcd/blockchain"
-	"github.com/syscoin/btcd/btcec"
-	"github.com/syscoin/btcd/chaincfg"
-	"github.com/syscoin/btcd/chaincfg/chainhash"
-	"github.com/syscoin/btcd/rpcclient"
-	"github.com/syscoin/btcd/txscript"
-	"github.com/syscoin/btcd/wire"
 	"github.com/martinboehm/btcutil"
 	"github.com/martinboehm/btcutil/hdkeychain"
+	"github.com/vpubchain/btcd/blockchain"
+	"github.com/vpubchain/btcd/btcec"
+	"github.com/vpubchain/btcd/chaincfg"
+	"github.com/vpubchain/btcd/chaincfg/chainhash"
+	"github.com/vpubchain/btcd/rpcclient"
+	"github.com/vpubchain/btcd/txscript"
+	"github.com/vpubchain/btcd/wire"
 )
 
 var (

@@ -14,13 +14,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/syscoin/btcd/chaincfg"
-	"github.com/syscoin/btcd/chaincfg/chainhash"
-	"github.com/syscoin/btcd/database"
-	_ "github.com/syscoin/btcd/database/ffldb"
-	"github.com/syscoin/btcd/txscript"
-	"github.com/syscoin/btcd/wire"
 	"github.com/martinboehm/btcutil"
+	"github.com/vpubchain/btcd/chaincfg"
+	"github.com/vpubchain/btcd/chaincfg/chainhash"
+	"github.com/vpubchain/btcd/database"
+	_ "github.com/vpubchain/btcd/database/ffldb"
+	"github.com/vpubchain/btcd/txscript"
+	"github.com/vpubchain/btcd/wire"
 )
 
 const (

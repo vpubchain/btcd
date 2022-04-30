@@ -11,9 +11,9 @@ import (
 	"encoding/binary"
 	"errors"
 
-	"github.com/syscoin/btcd/blockchain"
-	"github.com/syscoin/btcd/database"
 	"github.com/martinboehm/btcutil"
+	"github.com/vpubchain/btcd/blockchain"
+	"github.com/vpubchain/btcd/database"
 )
 
 var (

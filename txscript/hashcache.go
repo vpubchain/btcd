@@ -7,8 +7,8 @@ package txscript
 import (
 	"sync"
 
-	"github.com/syscoin/btcd/chaincfg/chainhash"
-	"github.com/syscoin/btcd/wire"
+	"github.com/vpubchain/btcd/chaincfg/chainhash"
+	"github.com/vpubchain/btcd/wire"
 )
 
 // TxSigHashes houses the partial set of sighashes introduced within BIP0143.

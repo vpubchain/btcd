@@ -14,11 +14,6 @@ import (
 	"sort"
 	"sync"
 
-	"github.com/syscoin/btcd/chaincfg/chainhash"
-	"github.com/syscoin/btcd/database"
-	"github.com/syscoin/btcd/database/internal/treap"
-	"github.com/syscoin/btcd/wire"
-	"github.com/martinboehm/btcutil"
 	"github.com/btcsuite/goleveldb/leveldb"
 	"github.com/btcsuite/goleveldb/leveldb/comparer"
 	ldberrors "github.com/btcsuite/goleveldb/leveldb/errors"
@@ -26,6 +21,11 @@ import (
 	"github.com/btcsuite/goleveldb/leveldb/iterator"
 	"github.com/btcsuite/goleveldb/leveldb/opt"
 	"github.com/btcsuite/goleveldb/leveldb/util"
+	"github.com/martinboehm/btcutil"
+	"github.com/vpubchain/btcd/chaincfg/chainhash"
+	"github.com/vpubchain/btcd/database"
+	"github.com/vpubchain/btcd/database/internal/treap"
+	"github.com/vpubchain/btcd/wire"
 )
 
 const (

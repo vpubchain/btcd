@@ -10,8 +10,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/syscoin/btcd/chaincfg/chainhash"
 	"github.com/davecgh/go-spew/spew"
+	"github.com/vpubchain/btcd/chaincfg/chainhash"
 )
 
 // TestNotFound tests the MsgNotFound API.

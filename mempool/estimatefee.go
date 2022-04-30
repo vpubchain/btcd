@@ -16,9 +16,9 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/syscoin/btcd/chaincfg/chainhash"
-	"github.com/syscoin/btcd/mining"
 	"github.com/martinboehm/btcutil"
+	"github.com/vpubchain/btcd/chaincfg/chainhash"
+	"github.com/vpubchain/btcd/mining"
 )
 
 // TODO incorporate Alex Morcos' modifications to Gavin's initial model
@@ -47,7 +47,7 @@ const (
 
 	bytePerKb = 1000
 
-	btcPerSatoshi = 1E-8
+	btcPerSatoshi = 1e-8
 )
 
 var (

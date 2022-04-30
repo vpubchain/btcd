@@ -9,10 +9,10 @@ import (
 	"encoding/hex"
 	"encoding/json"
 
-	"github.com/syscoin/btcd/btcjson"
-	"github.com/syscoin/btcd/chaincfg/chainhash"
-	"github.com/syscoin/btcd/wire"
 	"github.com/martinboehm/btcutil"
+	"github.com/vpubchain/btcd/btcjson"
+	"github.com/vpubchain/btcd/chaincfg/chainhash"
+	"github.com/vpubchain/btcd/wire"
 )
 
 // SigHashType enumerates the available signature hashing types that the

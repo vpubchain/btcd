@@ -10,9 +10,9 @@ import (
 	"encoding/hex"
 	"encoding/json"
 
-	"github.com/syscoin/btcd/btcjson"
-	"github.com/syscoin/btcd/chaincfg/chainhash"
-	"github.com/syscoin/btcd/wire"
+	"github.com/vpubchain/btcd/btcjson"
+	"github.com/vpubchain/btcd/chaincfg/chainhash"
+	"github.com/vpubchain/btcd/wire"
 )
 
 // FutureGetBestBlockHashResult is a future promise to deliver the result of a

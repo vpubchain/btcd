@@ -1157,8 +1157,8 @@ package main
 import (
 	"github.com/btcsuite/btcrpcclient"
 	"github.com/martinboehm/btcutil"
-	"github.com/syscoin/btcd/chaincfg/chainhash"
-	"github.com/syscoin/btcd/wire"
+	"github.com/vpubchain/btcd/chaincfg/chainhash"
+	"github.com/vpubchain/btcd/wire"
 	"io/ioutil"
 	"log"
 	"path/filepath"
@@ -1249,8 +1249,8 @@ package main
 import (
 	"github.com/btcsuite/btcrpcclient"
 	"github.com/martinboehm/btcutil"
-	"github.com/syscoin/btcd/chaincfg/chainhash"
-	"github.com/syscoin/btcd/wire"
+	"github.com/vpubchain/btcd/chaincfg/chainhash"
+	"github.com/vpubchain/btcd/wire"
 	"io/ioutil"
 	"log"
 	"path/filepath"

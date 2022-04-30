@@ -22,15 +22,15 @@ import (
 
 	"golang.org/x/crypto/ripemd160"
 
-	"github.com/syscoin/btcd/blockchain"
-	"github.com/syscoin/btcd/btcjson"
-	"github.com/syscoin/btcd/chaincfg"
-	"github.com/syscoin/btcd/chaincfg/chainhash"
-	"github.com/syscoin/btcd/database"
-	"github.com/syscoin/btcd/txscript"
-	"github.com/syscoin/btcd/wire"
-	"github.com/martinboehm/btcutil"
 	"github.com/btcsuite/websocket"
+	"github.com/martinboehm/btcutil"
+	"github.com/vpubchain/btcd/blockchain"
+	"github.com/vpubchain/btcd/btcjson"
+	"github.com/vpubchain/btcd/chaincfg"
+	"github.com/vpubchain/btcd/chaincfg/chainhash"
+	"github.com/vpubchain/btcd/database"
+	"github.com/vpubchain/btcd/txscript"
+	"github.com/vpubchain/btcd/wire"
 )
 
 const (

@@ -11,8 +11,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/syscoin/btcd/database"
-	"github.com/syscoin/btcd/wire"
+	"github.com/vpubchain/btcd/database"
+	"github.com/vpubchain/btcd/wire"
 )
 
 // TestErrNotInMainChain ensures the functions related to errNotInMainChain work

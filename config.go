@@ -20,17 +20,17 @@ import (
 	"strings"
 	"time"
 
-	"github.com/syscoin/btcd/blockchain"
-	"github.com/syscoin/btcd/chaincfg"
-	"github.com/syscoin/btcd/chaincfg/chainhash"
-	"github.com/syscoin/btcd/connmgr"
-	"github.com/syscoin/btcd/database"
-	_ "github.com/syscoin/btcd/database/ffldb"
-	"github.com/syscoin/btcd/mempool"
-	"github.com/syscoin/btcd/peer"
-	"github.com/martinboehm/btcutil"
 	"github.com/btcsuite/go-socks/socks"
 	flags "github.com/jessevdk/go-flags"
+	"github.com/martinboehm/btcutil"
+	"github.com/vpubchain/btcd/blockchain"
+	"github.com/vpubchain/btcd/chaincfg"
+	"github.com/vpubchain/btcd/chaincfg/chainhash"
+	"github.com/vpubchain/btcd/connmgr"
+	"github.com/vpubchain/btcd/database"
+	_ "github.com/vpubchain/btcd/database/ffldb"
+	"github.com/vpubchain/btcd/mempool"
+	"github.com/vpubchain/btcd/peer"
 )
 
 const (

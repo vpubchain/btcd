@@ -9,9 +9,9 @@ import (
 	"encoding/json"
 	"errors"
 
-	"github.com/syscoin/btcd/btcjson"
-	"github.com/syscoin/btcd/chaincfg/chainhash"
 	"github.com/martinboehm/btcutil"
+	"github.com/vpubchain/btcd/btcjson"
+	"github.com/vpubchain/btcd/chaincfg/chainhash"
 )
 
 // FutureGenerateResult is a future promise to deliver the result of a

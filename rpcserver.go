@@ -27,21 +27,21 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/syscoin/btcd/blockchain"
-	"github.com/syscoin/btcd/blockchain/indexers"
-	"github.com/syscoin/btcd/btcec"
-	"github.com/syscoin/btcd/btcjson"
-	"github.com/syscoin/btcd/chaincfg"
-	"github.com/syscoin/btcd/chaincfg/chainhash"
-	"github.com/syscoin/btcd/database"
-	"github.com/syscoin/btcd/mempool"
-	"github.com/syscoin/btcd/mining"
-	"github.com/syscoin/btcd/mining/cpuminer"
-	"github.com/syscoin/btcd/peer"
-	"github.com/syscoin/btcd/txscript"
-	"github.com/syscoin/btcd/wire"
-	"github.com/martinboehm/btcutil"
 	"github.com/btcsuite/websocket"
+	"github.com/martinboehm/btcutil"
+	"github.com/vpubchain/btcd/blockchain"
+	"github.com/vpubchain/btcd/blockchain/indexers"
+	"github.com/vpubchain/btcd/btcec"
+	"github.com/vpubchain/btcd/btcjson"
+	"github.com/vpubchain/btcd/chaincfg"
+	"github.com/vpubchain/btcd/chaincfg/chainhash"
+	"github.com/vpubchain/btcd/database"
+	"github.com/vpubchain/btcd/mempool"
+	"github.com/vpubchain/btcd/mining"
+	"github.com/vpubchain/btcd/mining/cpuminer"
+	"github.com/vpubchain/btcd/peer"
+	"github.com/vpubchain/btcd/txscript"
+	"github.com/vpubchain/btcd/wire"
 )
 
 // API version constants
@@ -4281,7 +4281,7 @@ func newRPCServer(config *rpcserverConfig) (*rpcServer, error) {
 		gbtWorkState:           newGbtWorkState(config.TimeSource),
 		helpCacher:             newHelpCacher(),
 		requestProcessShutdown: make(chan struct{}),
-		quit: make(chan int),
+		quit:                   make(chan int),
 	}
 	if cfg.RPCUser != "" && cfg.RPCPass != "" {
 		login := cfg.RPCUser + ":" + cfg.RPCPass

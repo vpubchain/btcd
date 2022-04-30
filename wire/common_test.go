@@ -12,8 +12,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/syscoin/btcd/chaincfg/chainhash"
 	"github.com/davecgh/go-spew/spew"
+	"github.com/vpubchain/btcd/chaincfg/chainhash"
 )
 
 // mainNetGenesisHash is the hash of the first block in the block chain for the

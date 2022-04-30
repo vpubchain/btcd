@@ -11,7 +11,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/syscoin/btcd/btcjson"
+	"github.com/vpubchain/btcd/btcjson"
 )
 
 // TestBtcWalletExtCmds tests all of the btcwallet extended commands marshal and

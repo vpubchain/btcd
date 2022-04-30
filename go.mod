@@ -1,4 +1,6 @@
-module github.com/syscoin/btcd
+module github.com/vpubchain/btcd
+
+go 1.15
 
 require (
 	github.com/aead/siphash v1.0.1

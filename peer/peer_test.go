@@ -13,11 +13,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/syscoin/btcd/chaincfg"
-	"github.com/syscoin/btcd/chaincfg/chainhash"
-	"github.com/syscoin/btcd/peer"
-	"github.com/syscoin/btcd/wire"
 	"github.com/btcsuite/go-socks/socks"
+	"github.com/vpubchain/btcd/chaincfg"
+	"github.com/vpubchain/btcd/chaincfg/chainhash"
+	"github.com/vpubchain/btcd/peer"
+	"github.com/vpubchain/btcd/wire"
 )
 
 // conn mocks a network connection by implementing the net.Conn interface.  It

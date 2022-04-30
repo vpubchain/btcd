@@ -9,7 +9,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/syscoin/btcd/wire"
+	"github.com/vpubchain/btcd/wire"
 )
 
 // TestParseOpcode tests for opcode parsing with bad data templates.

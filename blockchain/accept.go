@@ -7,8 +7,8 @@ package blockchain
 import (
 	"fmt"
 
-	"github.com/syscoin/btcd/database"
 	"github.com/martinboehm/btcutil"
+	"github.com/vpubchain/btcd/database"
 )
 
 // maybeAcceptBlock potentially accepts a block into the block chain and, if

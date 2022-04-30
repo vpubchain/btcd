@@ -9,9 +9,9 @@ import (
 	"fmt"
 	"math"
 
-	"github.com/syscoin/btcd/chaincfg/chainhash"
-	"github.com/syscoin/btcd/txscript"
 	"github.com/martinboehm/btcutil"
+	"github.com/vpubchain/btcd/chaincfg/chainhash"
+	"github.com/vpubchain/btcd/txscript"
 )
 
 const (

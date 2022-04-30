@@ -12,10 +12,10 @@ import (
 	"runtime"
 	"testing"
 
-	"github.com/syscoin/btcd/chaincfg"
-	"github.com/syscoin/btcd/database"
-	"github.com/syscoin/btcd/database/ffldb"
 	"github.com/martinboehm/btcutil"
+	"github.com/vpubchain/btcd/chaincfg"
+	"github.com/vpubchain/btcd/database"
+	"github.com/vpubchain/btcd/database/ffldb"
 )
 
 // dbType is the database type name for this driver.
